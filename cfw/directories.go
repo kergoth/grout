@@ -4,6 +4,7 @@ import (
 	"grout/cfw/allium"
 	"grout/cfw/arkos"
 	"grout/cfw/batocera"
+	"grout/cfw/emudeck"
 	"grout/cfw/knulli"
 	"grout/cfw/koriki"
 	"grout/cfw/minui"
@@ -13,7 +14,9 @@ import (
 	"grout/cfw/rocknix"
 	"grout/cfw/spruce"
 	"grout/cfw/trimui"
+	"grout/internal/gamelist"
 	"path/filepath"
+	"strings"
 )
 
 // GetRomDirectory returns the ROM directory for the current CFW.
@@ -43,6 +46,8 @@ func GetRomDirectory() string {
 		return batocera.GetRomDirectory()
 	case MinUI:
 		return minui.GetRomDirectory()
+	case EmuDeck:
+		return emudeck.GetRomDirectory()
 	}
 	return ""
 }
@@ -86,6 +91,8 @@ func GetBIOSDirectory() string {
 		return batocera.GetBIOSDirectory()
 	case MinUI:
 		return minui.GetBIOSDirectory()
+	case EmuDeck:
+		return emudeck.GetBIOSDirectory()
 	}
 	return ""
 }
@@ -139,6 +146,8 @@ func GetArtDirectory(romDir string, platformFSSlug, platformName string) string 
 		return batocera.GetArtDirectory(romDir)
 	case MinUI:
 		return minui.GetArtDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetArtDirectory(romDir)
 	default:
 		return ""
 	}
@@ -189,6 +198,8 @@ func BaseSavePath() string {
 		return batocera.GetBaseSavePath()
 	case MinUI:
 		return minui.GetBaseSavePath()
+	case EmuDeck:
+		return emudeck.GetBaseSavePath()
 	}
 	return ""
 }
@@ -203,6 +214,8 @@ func GetArtMarqueeDirectory(romDir string, platformFSSlug, platformName string) 
 		return knulli.GetArtDirectory(romDir)
 	case Batocera:
 		return batocera.GetArtDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetMarqueeDirectory(romDir)
 	default:
 		return ""
 	}
@@ -218,6 +231,8 @@ func GetArtVideoDirectory(romDir string, platformFSSlug, platformName string) st
 		return knulli.GetVideoDirectory(romDir)
 	case Batocera:
 		return batocera.GetVideoDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetVideoDirectory(romDir)
 	default:
 		return ""
 	}
@@ -263,6 +278,8 @@ func GetManualDirectory(romDir string, platformFSSlug, platformName string) stri
 		return knulli.GetManualDirectory(romDir)
 	case Batocera:
 		return batocera.GetManualDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetManualDirectory(romDir)
 	default:
 		return ""
 	}
@@ -278,6 +295,8 @@ func GetBoxbackDirectory(romDir string, platformFSSlug, platformName string) str
 		return knulli.GetArtDirectory(romDir)
 	case Batocera:
 		return batocera.GetArtDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetBoxbackDirectory(romDir)
 	default:
 		return ""
 	}
@@ -293,7 +312,23 @@ func GetFanartDirectory(romDir string, platformFSSlug, platformName string) stri
 		return knulli.GetArtDirectory(romDir)
 	case Batocera:
 		return batocera.GetArtDirectory(romDir)
+	case EmuDeck:
+		return emudeck.GetFanartDirectory(romDir)
 	default:
 		return ""
+	}
+}
+
+// GetPlatformGamelistPath returns the gamelist.xml path for a platform's ROM directory.
+// For EmuDeck, gamelists live in ES-DE's per-system gamelist tree rather than
+// alongside the ROMs.
+func GetPlatformGamelistPath(romDir, platformFSSlug string) string {
+	switch GetCFW() {
+	case EmuDeck:
+		rel, _ := filepath.Rel(GetRomDirectory(), romDir)
+		system := strings.Split(filepath.ToSlash(rel), "/")[0]
+		return emudeck.GetGroutGamelist(system)
+	default:
+		return filepath.Join(romDir, string(gamelist.GameListFileName))
 	}
 }

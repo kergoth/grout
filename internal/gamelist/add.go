@@ -35,6 +35,7 @@ type RomGameEntry struct {
 	GamePath     string
 	RomDirectory string
 	Platform     *romm.Platform
+	GamelistPath string
 }
 
 func (gl *GameList) AddRomGame(entry RomGameEntry) {

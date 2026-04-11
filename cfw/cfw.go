@@ -21,6 +21,7 @@ const (
 	ArkOS    CFW = "ARKOS"
 	Batocera CFW = "BATOCERA"
 	MinUI    CFW = "MINUI"
+	EmuDeck  CFW = "EMUDECK"
 )
 
 func GetCFW() CFW {
@@ -28,18 +29,18 @@ func GetCFW() CFW {
 	cfw := CFW(cfwEnv)
 
 	switch cfw {
-	case MuOS, NextUI, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI:
+	case MuOS, NextUI, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI, EmuDeck:
 		return cfw
 	default:
 		log.SetOutput(os.Stderr)
-		log.Fatalf("Unsupported CFW: '%s'. Valid options: NextUI, muOS, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI", cfwEnv)
+		log.Fatalf("Unsupported CFW: '%s'. Valid options: NextUI, muOS, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI, EmuDeck", cfwEnv)
 		return ""
 	}
 }
 
 func (c CFW) IsBasedOnEmulationStation() bool {
 	switch c {
-	case Knulli, ROCKNIX, ArkOS, Batocera:
+	case Knulli, ROCKNIX, ArkOS, Batocera, EmuDeck:
 		return true
 	default:
 		return false

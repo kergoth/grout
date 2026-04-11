@@ -5,8 +5,9 @@ import (
 	"grout/cache"
 	"grout/cfw"
 	"grout/cfw/allium"
-	"grout/cfw/arkos"
-	"grout/cfw/koriki"
+t"grout/cfw/arkos"
+t"grout/cfw/emudeck"
+t"grout/cfw/koriki"
 	"grout/cfw/minui"
 	"grout/cfw/muos"
 	"grout/cfw/nextui"
@@ -39,6 +40,12 @@ type SetupResult struct {
 
 func setup() SetupResult {
 	currentCFW := cfw.GetCFW()
+
+	if currentCFW == cfw.EmuDeck {
+		if err := emudeck.ValidateConfig(); err != nil {
+			log.Fatalf("EmuDeck configuration invalid: %v", err)
+		}
+	}
 
 	setupInputMapping(currentCFW)
 	initFramework(currentCFW)

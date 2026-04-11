@@ -354,10 +354,6 @@ func (s *DownloadScreen) buildDownloads(config internal.Config, host romm.Host, 
 	gamesSummaries := make([]gamelist.RomGameEntry, 0, len(games))
 
 	for _, g := range games {
-		gamelistRomEntry := gamelist.RomGameEntry{
-			Game:     &g,
-			Platform: &platform,
-		}
 		gamePlatform := platform
 		if platform.ID == 0 && g.PlatformID != 0 {
 			gamePlatform = romm.Platform{
@@ -365,6 +361,11 @@ func (s *DownloadScreen) buildDownloads(config internal.Config, host romm.Host, 
 				FSSlug: g.PlatformFSSlug,
 				Name:   g.PlatformDisplayName,
 			}
+		}
+		gamelistRomEntry := gamelist.RomGameEntry{
+			Game:         &g,
+			Platform:     &gamePlatform,
+			GamelistPath: config.GetPlatformGamelistPath(gamePlatform),
 		}
 
 		romDirectory := config.GetPlatformRomDirectory(gamePlatform)

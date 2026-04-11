@@ -38,11 +38,13 @@ func AddGroutToGamelist(c CFW) {
 func FillGamesMetadata(entries []gamelist.RomGameEntry) {
 	logger := gaba.GetLogger()
 	switch GetCFW() {
-	case Knulli, ROCKNIX, ArkOS, Batocera:
+	case Knulli, ROCKNIX, ArkOS, Batocera, EmuDeck:
 		if err := gamelist.AddRomGamesToGamelist(entries, gamelist.GameListFileName); err != nil {
 			logger.Warn("Failed to add games to ES gamelist.xml", "error", err)
 		}
-		scheduleESRestart()
+		if GetCFW() != EmuDeck {
+			scheduleESRestart()
+		}
 	case Spruce, Allium, Onion, Koriki:
 		if err := gamelist.AddRomGamesToGamelist(entries, gamelist.MiyooGameListFileName); err != nil {
 			logger.Warn("Failed to add games to miyoogamelist.xml", "error", err)

@@ -357,8 +357,13 @@ func (c Config) ResolveRommFSSlug(cfwKey string) string {
 	return cfwKey
 }
 
+func (c Config) GetPlatformGamelistPath(platform romm.Platform) string {
+	romDir := c.GetPlatformRomDirectory(platform)
+	return cfw.GetPlatformGamelistPath(romDir, platform.FSSlug)
+}
+
 func (c Config) GetPlatformRomDirectory(platform romm.Platform) string {
-	rp := platform.FSSlug
+	var rp string
 	if mapping, ok := c.DirectoryMappings[platform.FSSlug]; ok && mapping.RelativePath != "" {
 		rp = mapping.RelativePath
 	}
