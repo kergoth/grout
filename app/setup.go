@@ -103,6 +103,8 @@ func setupInputMapping(currentCFW cfw.CFW) {
 		mappingBytes, mappingErr = rocknix.GetInputMappingBytes()
 	case cfw.ArkOS:
 		mappingBytes, mappingErr = arkos.GetInputMappingBytes()
+	case cfw.EmuDeck:
+		mappingBytes, mappingErr = emudeck.GetInputMappingBytes()
 	}
 
 	if mappingBytes != nil && mappingErr == nil {

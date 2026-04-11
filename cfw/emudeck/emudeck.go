@@ -15,9 +15,24 @@ import (
 //go:embed data/*.json
 var embeddedFiles embed.FS
 
+//go:embed input_mappings/*.json
+var embeddedInputMappings embed.FS
+
 var (
 	Platforms = jsonutil.MustLoadJSONMap[string, []string](embeddedFiles, "data/platforms.json")
 )
+
+func GetInputMappingBytes() ([]byte, error) {
+	overridePath := filepath.Join("overrides", "cfw", "emudeck", "input_mappings", "steamdeck.json")
+	data, err := os.ReadFile(overridePath)
+	if err != nil {
+		data, err = embeddedInputMappings.ReadFile("input_mappings/steamdeck.json")
+		if err != nil {
+			return nil, fmt.Errorf("failed to read embedded input mapping: %w", err)
+		}
+	}
+	return data, nil
+}
 
 type emuDeckSettings struct {
 	StoragePath string `json:"storagePath"`
