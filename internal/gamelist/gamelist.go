@@ -30,6 +30,12 @@ const (
 	CheevosHashElement = "cheevosHash"
 	CheevosIDElement   = "cheevosId"
 	ScraperIDElement   = "scraperId"
+
+	// wrapperElement is used to re-parse ES-DE gamelist files that have
+	// sibling elements before <gameList> (e.g. <alternativeEmulator>).
+	// Standard XML requires a single root, so we wrap the raw bytes before
+	// parsing and unwrap on save.
+	wrapperElement = "groutWrapper"
 )
 
 type FileName string
@@ -56,18 +62,43 @@ func emptyGameList() *etree.Document {
 	return document
 }
 
+// Parse reads a gamelist XML byte slice. If the bytes are not valid XML
+// (e.g. ES-DE files with <alternativeEmulator> before <gameList>), it wraps
+// the content in a synthetic root element so that all children remain
+// accessible. Save() strips the wrapper back out when writing.
 func (gl *GameList) Parse(b []byte) error {
 	document := etree.NewDocument()
-	if err := document.ReadFromBytes(b); err != nil {
-		return err
+	if err := document.ReadFromBytes(b); err == nil {
+		gl.document = document
+		return nil
 	}
 
+	wrapped := []byte("<" + wrapperElement + ">" + string(b) + "</" + wrapperElement + ">")
+	document = etree.NewDocument()
+	if err := document.ReadFromBytes(wrapped); err != nil {
+		return err
+	}
 	gl.document = document
 	return nil
 }
 
+// root returns the <gameList> element, navigating through the wrapper element
+// when the document was parsed from an ES-DE file with sibling elements.
+func (gl *GameList) root() *etree.Element {
+	if root := gl.document.SelectElement(GameListElement); root != nil {
+		return root
+	}
+	if wrapper := gl.document.SelectElement(wrapperElement); wrapper != nil {
+		return wrapper.SelectElement(GameListElement)
+	}
+	return nil
+}
+
 func (gl *GameList) Contains(element, value string) bool {
-	root := gl.document.SelectElement(GameListElement)
+	root := gl.root()
+	if root == nil {
+		return false
+	}
 	games := root.SelectElements(GameElement)
 	for _, game := range games {
 		element := game.FindElement(element)
@@ -79,7 +110,10 @@ func (gl *GameList) Contains(element, value string) bool {
 }
 
 func (gl *GameList) GetGameElementByName(name string) *etree.Element {
-	root := gl.document.SelectElement(GameListElement)
+	root := gl.root()
+	if root == nil {
+		return nil
+	}
 	games := root.SelectElements(GameElement)
 	for _, game := range games {
 		nameElement := game.FindElement(NameElement)
@@ -103,16 +137,37 @@ func (gl *GameList) GameContainsElements(name string, elements []string) bool {
 	return true
 }
 
-func (gl *GameList) Save(filepath string) error {
-	gl.document.Indent(4)
-	if err := gl.document.WriteToFile(filepath); err != nil {
-		return err
+// Save writes the gamelist to path. When the document was parsed from an
+// ES-DE file using the wrapper strategy, the wrapper element is stripped so
+// the original multi-root structure is preserved.
+func (gl *GameList) Save(path string) error {
+	if wrapper := gl.document.SelectElement(wrapperElement); wrapper != nil {
+		out := etree.NewDocument()
+		for _, child := range wrapper.Child {
+			switch t := child.(type) {
+			case *etree.Element:
+				out.AddChild(t.Copy())
+			case *etree.ProcInst:
+				out.CreateProcInst(t.Target, t.Inst)
+			case *etree.CharData:
+				out.CreateCharData(t.Data)
+			case *etree.Comment:
+				out.CreateComment(t.Data)
+			}
+		}
+		out.Indent(4)
+		return out.WriteToFile(path)
 	}
-	return nil
+	gl.document.Indent(4)
+	return gl.document.WriteToFile(path)
 }
 
 func (gl *GameList) AddGameEntry(info map[string]string) {
-	root := gl.document.SelectElement(GameListElement)
+	root := gl.root()
+	if root == nil {
+		gl.document = emptyGameList()
+		root = gl.root()
+	}
 	newGame := root.CreateElement(GameElement)
 
 	for key, value := range info {

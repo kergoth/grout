@@ -6,6 +6,7 @@ import (
 	"grout/internal/stringutil"
 	"grout/romm"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -134,10 +135,17 @@ func (gl *GameList) AddRomGame(entry RomGameEntry) {
 func AddRomGamesToGamelist(entry []RomGameEntry, gamelistFilename FileName) error {
 	gamelists := make(map[string]GameListEntry)
 	for _, game := range entry {
-		glEntry, exists := gamelists[game.Platform.FSSlug]
+		gamelistPath := game.GamelistPath
+		if gamelistPath == "" {
+			gamelistPath = fmt.Sprintf("%s/%s", game.RomDirectory, gamelistFilename)
+		}
+		glEntry, exists := gamelists[gamelistPath]
 		if !exists {
+			if err := os.MkdirAll(filepath.Dir(gamelistPath), 0o755); err != nil {
+				gaba.GetLogger().Error("Unable to create gamelist directory", "error", err, "path", gamelistPath)
+				continue
+			}
 			gl := New()
-			gamelistPath := fmt.Sprintf("%s/%s", game.RomDirectory, gamelistFilename)
 			if fileutil.FileExists(gamelistPath) {
 				data, err := os.ReadFile(gamelistPath)
 				if err != nil {
@@ -154,7 +162,7 @@ func AddRomGamesToGamelist(entry []RomGameEntry, gamelistFilename FileName) erro
 				}
 			}
 			glEntry = GameListEntry{Path: gamelistPath, GL: gl}
-			gamelists[game.Platform.FSSlug] = glEntry
+			gamelists[gamelistPath] = glEntry
 		}
 
 		glEntry.GL.AddRomGame(game)

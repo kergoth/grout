@@ -26,6 +26,14 @@ tasks:
       - adb push config-platformless.json /mnt/sdcard/MUOS/application/Grout/config.json
     silent: true
 
+  emudeck:
+    desc: Deploy to Steam Deck via SSH
+    cmds:
+      - ssh steamdeck 'rm -rf /home/deck/Applications/Grout && mkdir -p /home/deck/Applications/Grout/lib'
+      - rsync -av build/grout steamdeck:/home/deck/Applications/Grout/
+      - rsync -av build/lib/ steamdeck:/home/deck/Applications/Grout/lib/
+    silent: true
+
   knulli:
     desc: Deploy to Knulli device via ADB
     cmds:
