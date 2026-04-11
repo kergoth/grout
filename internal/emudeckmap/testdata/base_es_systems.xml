@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<systemList>
+  <system>
+    <name>psx</name>
+    <path>%ROMPATH%/psx</path>
+    <platform>psx</platform>
+  </system>
+  <system>
+    <name>wiiu</name>
+    <path>%ROMPATH%/wiiu</path>
+    <platform>wiiu</platform>
+  </system>
+</systemList>

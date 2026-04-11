@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<systemList>
+  <system>
+    <name>model2</name>
+    <path>%ROMPATH%/model2/roms</path>
+    <platform>arcade</platform>
+  </system>
+  <system>
+    <name>wiiu</name>
+    <path>%ROMPATH%/wiiu/roms</path>
+    <platform>wiiu</platform>
+  </system>
+</systemList>
