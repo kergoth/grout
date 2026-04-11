@@ -251,8 +251,8 @@
     "nes"
   ],
   "ngage": [
-    "ngage",
-    "symbian"
+    "symbian",
+    "ngage"
   ],
   "ngc": [
     "gc"
@@ -334,13 +334,13 @@
     "sega32xna"
   ],
   "segacd": [
+    "segacd",
     "megacd",
-    "megacdjp",
-    "segacd"
+    "megacdjp"
   ],
   "sg1000": [
-    "multivision",
-    "sg-1000"
+    "sg-1000",
+    "multivision"
   ],
   "sgb": [
     "sgb"
@@ -349,12 +349,12 @@
     "x68000"
   ],
   "sms": [
-    "mark3",
-    "mastersystem"
+    "mastersystem",
+    "mark3"
   ],
   "snes": [
-    "sfc",
     "snes",
+    "sfc",
     "snesna"
   ],
   "solarus": [
@@ -382,8 +382,8 @@
     "switch"
   ],
   "tg16": [
-    "pcengine",
-    "tg16"
+    "tg16",
+    "pcengine"
   ],
   "ti99": [
     "ti99"
@@ -395,8 +395,8 @@
     "trs-80"
   ],
   "turbografx-cd": [
-    "pcenginecd",
-    "tg-cd"
+    "tg-cd",
+    "pcenginecd"
   ],
   "uzebox": [
     "uzebox"
@@ -429,6 +429,7 @@
     "wiiu/roms"
   ],
   "windows": [
+    "pc",
     "ags",
     "desktop",
     "doom",
@@ -436,7 +437,6 @@
     "epic",
     "kodi",
     "lutris",
-    "pc",
     "ports",
     "quake",
     "windows",
