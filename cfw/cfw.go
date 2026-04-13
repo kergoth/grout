@@ -9,19 +9,20 @@ import (
 type CFW string
 
 const (
-	NextUI   CFW = "NEXTUI"
-	MuOS     CFW = "MUOS"
-	Knulli   CFW = "KNULLI"
-	Spruce   CFW = "SPRUCE"
-	ROCKNIX  CFW = "ROCKNIX"
-	Trimui   CFW = "TRIMUI"
-	Allium   CFW = "ALLIUM"
-	Onion    CFW = "ONION"
-	Koriki   CFW = "KORIKI"
-	ArkOS    CFW = "ARKOS"
-	Batocera CFW = "BATOCERA"
-	MinUI    CFW = "MINUI"
-	EmuDeck  CFW = "EMUDECK"
+	NextUI    CFW = "NEXTUI"
+	MuOS      CFW = "MUOS"
+	Knulli    CFW = "KNULLI"
+	Spruce    CFW = "SPRUCE"
+	ROCKNIX   CFW = "ROCKNIX"
+	Trimui    CFW = "TRIMUI"
+	Allium    CFW = "ALLIUM"
+	Onion     CFW = "ONION"
+	Koriki    CFW = "KORIKI"
+	ArkOS     CFW = "ARKOS"
+	Batocera  CFW = "BATOCERA"
+	MinUI     CFW = "MINUI"
+	EmuDeck   CFW = "EMUDECK"
+	RetroDeck CFW = "RETRODECK"
 )
 
 func GetCFW() CFW {
@@ -29,18 +30,18 @@ func GetCFW() CFW {
 	cfw := CFW(cfwEnv)
 
 	switch cfw {
-	case MuOS, NextUI, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI, EmuDeck:
+	case MuOS, NextUI, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Batocera, MinUI, Koriki, ArkOS, EmuDeck, RetroDeck:
 		return cfw
 	default:
 		log.SetOutput(os.Stderr)
-		log.Fatalf("Unsupported CFW: '%s'. Valid options: NextUI, muOS, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI, EmuDeck", cfwEnv)
+		log.Fatalf("Unsupported CFW: '%s'. Valid options: NextUI, muOS, Knulli, Spruce, ROCKNIX, Trimui, Allium, Onion, Koriki, ArkOS, Batocera, MinUI, EmuDeck, RetroDeck", cfwEnv)
 		return ""
 	}
 }
 
 func (c CFW) IsBasedOnEmulationStation() bool {
 	switch c {
-	case Knulli, ROCKNIX, ArkOS, Batocera, EmuDeck:
+	case Knulli, ROCKNIX, Batocera, Koriki, ArkOS, EmuDeck, RetroDeck:
 		return true
 	default:
 		return false

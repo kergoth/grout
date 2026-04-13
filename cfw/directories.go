@@ -11,6 +11,7 @@ import (
 	"grout/cfw/muos"
 	"grout/cfw/nextui"
 	"grout/cfw/onion"
+	"grout/cfw/retrodeck"
 	"grout/cfw/rocknix"
 	"grout/cfw/spruce"
 	"grout/cfw/trimui"
@@ -48,6 +49,8 @@ func GetRomDirectory() string {
 		return minui.GetRomDirectory()
 	case EmuDeck:
 		return emudeck.GetRomDirectory()
+	case RetroDeck:
+		return retrodeck.GetRomDirectory()
 	}
 	return ""
 }
@@ -93,6 +96,8 @@ func GetBIOSDirectory() string {
 		return minui.GetBIOSDirectory()
 	case EmuDeck:
 		return emudeck.GetBIOSDirectory()
+	case RetroDeck:
+		return retrodeck.GetBIOSDirectory()
 	}
 	return ""
 }
@@ -148,6 +153,8 @@ func GetArtDirectory(romDir string, platformFSSlug, platformName string) string 
 		return minui.GetArtDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetArtDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetArtDirectory(romDir)
 	default:
 		return ""
 	}
@@ -200,6 +207,8 @@ func BaseSavePath() string {
 		return minui.GetBaseSavePath()
 	case EmuDeck:
 		return emudeck.GetBaseSavePath()
+	case RetroDeck:
+		return retrodeck.GetBaseSavePath()
 	}
 	return ""
 }
@@ -216,6 +225,8 @@ func GetArtMarqueeDirectory(romDir string, platformFSSlug, platformName string) 
 		return batocera.GetArtDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetMarqueeDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetMarqueeDirectory(romDir)
 	default:
 		return ""
 	}
@@ -233,6 +244,8 @@ func GetArtVideoDirectory(romDir string, platformFSSlug, platformName string) st
 		return batocera.GetVideoDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetVideoDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetVideoDirectory(romDir)
 	default:
 		return ""
 	}
@@ -280,6 +293,8 @@ func GetManualDirectory(romDir string, platformFSSlug, platformName string) stri
 		return batocera.GetManualDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetManualDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetManualDirectory(romDir)
 	default:
 		return ""
 	}
@@ -297,6 +312,8 @@ func GetBoxbackDirectory(romDir string, platformFSSlug, platformName string) str
 		return batocera.GetArtDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetBoxbackDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetBoxbackDirectory(romDir)
 	default:
 		return ""
 	}
@@ -314,6 +331,8 @@ func GetFanartDirectory(romDir string, platformFSSlug, platformName string) stri
 		return batocera.GetArtDirectory(romDir)
 	case EmuDeck:
 		return emudeck.GetFanartDirectory(romDir)
+	case RetroDeck:
+		return retrodeck.GetFanartDirectory(romDir)
 	default:
 		return ""
 	}
@@ -328,6 +347,10 @@ func GetPlatformGamelistPath(romDir, platformFSSlug string) string {
 		rel, _ := filepath.Rel(GetRomDirectory(), romDir)
 		system := strings.Split(filepath.ToSlash(rel), "/")[0]
 		return emudeck.GetGroutGamelist(system)
+	case RetroDeck:
+		rel, _ := filepath.Rel(GetRomDirectory(), romDir)
+		system := strings.Split(filepath.ToSlash(rel), "/")[0]
+		return retrodeck.GetGroutGamelist(system)
 	default:
 		return filepath.Join(romDir, string(gamelist.GameListFileName))
 	}

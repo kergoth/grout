@@ -5,13 +5,14 @@ import (
 	"grout/cache"
 	"grout/cfw"
 	"grout/cfw/allium"
-t"grout/cfw/arkos"
-t"grout/cfw/emudeck"
-t"grout/cfw/koriki"
+	"grout/cfw/arkos"
+	"grout/cfw/emudeck"
+	"grout/cfw/koriki"
 	"grout/cfw/minui"
 	"grout/cfw/muos"
 	"grout/cfw/nextui"
 	"grout/cfw/onion"
+	"grout/cfw/retrodeck"
 	"grout/cfw/rocknix"
 	"grout/cfw/spruce"
 	"grout/internal"
@@ -44,6 +45,11 @@ func setup() SetupResult {
 	if currentCFW == cfw.EmuDeck {
 		if err := emudeck.ValidateConfig(); err != nil {
 			log.Fatalf("EmuDeck configuration invalid: %v", err)
+		}
+	}
+	if currentCFW == cfw.RetroDeck {
+		if err := retrodeck.ValidateConfig(); err != nil {
+			log.Fatalf("RetroDECK configuration invalid: %v", err)
 		}
 	}
 
@@ -105,6 +111,8 @@ func setupInputMapping(currentCFW cfw.CFW) {
 		mappingBytes, mappingErr = arkos.GetInputMappingBytes()
 	case cfw.EmuDeck:
 		mappingBytes, mappingErr = emudeck.GetInputMappingBytes()
+	case cfw.RetroDeck:
+		mappingBytes, mappingErr = retrodeck.GetInputMappingBytes()
 	}
 
 	if mappingBytes != nil && mappingErr == nil {

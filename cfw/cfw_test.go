@@ -9,3 +9,11 @@ func TestEmuDeckIsEmulationStationBased(t *testing.T) {
 		t.Fatal("EMUDECK should be treated as ES-based")
 	}
 }
+
+func TestArkOSAndKorikiAreEmulationStationBased(t *testing.T) {
+	for _, platform := range []CFW{ArkOS, Koriki} {
+		if !platform.IsBasedOnEmulationStation() {
+			t.Fatalf("%s should be treated as ES-based", platform)
+		}
+	}
+}
