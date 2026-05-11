@@ -3,8 +3,10 @@ package cfw
 import (
 	"grout/cfw/arkos"
 	"grout/cfw/batocera"
+	"grout/cfw/emudeck"
 	"grout/cfw/knulli"
 	"grout/cfw/muos"
+	"grout/cfw/retrodeck"
 	"grout/cfw/rocknix"
 	"grout/internal/emulationstation"
 	"grout/internal/gamelist"
@@ -29,6 +31,10 @@ func AddGroutToGamelist(c CFW) {
 		gamelist.AddGroutEntry(arkos.GetGroutGamelist(), "./Grout.sh")
 	case Batocera:
 		gamelist.AddGroutEntry(batocera.GetGroutGamelist(), "./Grout/Grout.sh")
+	case EmuDeck:
+		gamelist.AddGroutEntry(emudeck.GetGroutGamelist("ports"), "./Grout.sh")
+	case RetroDeck:
+		gamelist.AddGroutEntry(retrodeck.GetGroutGamelist("ports"), "./Grout.sh")
 	default:
 		return
 	}
