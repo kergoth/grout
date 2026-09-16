@@ -7,7 +7,7 @@ Get up and running with Grout in five steps.
 Make sure you have:
 
 - A RomM server running and accessible
-- A compatible device running [Allium][allium], [ArkOS][arkos]/[dArkOS][darkos], [Batocera][batocera], [Knulli][knulli], [Koriki][koriki], [MinUI][minui], [muOS][muos], [NextUI][nextui], [Onion][onion], [ROCKNIX][rocknix], [Spruce v4][spruce]/[SprigUI][sprigui]/[TwigUI][twigui], or [TrimUI][trimui]
+- A compatible device running [Allium][allium], [ArkOS][arkos]/[dArkOS][darkos], [Batocera][batocera], [EmuDeck][emudeck], [Knulli][knulli], [Koriki][koriki], [MinUI][minui], [muOS][muos], [NextUI][nextui], [Onion][onion], [RetroDECK][retrodeck], [ROCKNIX][rocknix], [Spruce v4][spruce]/[SprigUI][sprigui]/[TwigUI][twigui], or [TrimUI][trimui]
 - Your device connected to Wi-Fi
 
 ---
@@ -21,12 +21,14 @@ Choose your platform:
 - [Allium Installation](install-allium.md)
 - [ArkOS / dArkOS Installation](install-arkos.md)
 - [Batocera Installation](install-batocera.md)
+- [EmuDeck Installation](install-emudeck.md)
 - [Knulli Installation](install-knulli.md)
 - [Koriki Installation](install-koriki.md)
 - [MinUI Installation](install-minui.md)
 - [muOS Installation](install-muos.md)
 - [NextUI Installation](install-nextui.md)
 - [Onion Installation](install-onion.md)
+- [RetroDECK Installation](install-retrodeck.md)
 - [ROCKNIX Installation](install-rocknix.md)
 - [Spruce / SprigUI / TwigUI Installation](install-spruce.md)
 - [TrimUI Installation](install-trimui.md)

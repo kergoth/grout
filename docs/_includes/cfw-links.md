@@ -2,12 +2,14 @@
 [arkos]: https://github.com/christianhaitian/arkos
 [darkos]: https://github.com/christianhaitian/dArkOS
 [batocera]: https://batocera.org
+[emudeck]: https://www.emudeck.com/
 [knulli]: https://knulli.org
 [koriki]: https://github.com/Rparadise-Team/Koriki
 [minui]: https://github.com/shauninman/MinUI
 [muos]: https://muos.dev
 [nextui]: https://nextui.loveretro.games
 [onion]: https://onionui.github.io
+[retrodeck]: https://retrodeck.net/
 [rocknix]: https://rocknix.org
 [spruce]: https://spruceui.github.io/
 [sprigui]: https://github.com/spruceUI/sprigUI
