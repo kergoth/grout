@@ -27,13 +27,20 @@ tasks:
     silent: true
 
   emudeck:
-    desc: Deploy to Steam Deck via SSH
+    desc: Deploy to Steam Deck via SSH (EmuDeck ports)
     cmds:
-      - ssh steamdeck 'rm -rf /home/deck/Applications/Grout && mkdir -p /home/deck/Applications/Grout/lib'
-      - rsync -av build/grout steamdeck:/home/deck/Applications/Grout/
-      - rsync -av build/lib/ steamdeck:/home/deck/Applications/Grout/lib/
+      - >-
+        ports_path=$(ssh steamdeck 'set -eu;
+        settings="$HOME/.config/EmuDeck/settings.json";
+        [ -f "$settings" ] || { echo "missing required path: $settings" >&2; exit 1; };
+        storage_path=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get(\"storagePath\",\"\"))" "$settings");
+        [ -n "$storage_path" ] || { echo "missing required value: storagePath in $settings" >&2; exit 1; };
+        ports_path="$storage_path/Emulation/roms/ports";
+        [ -d "$ports_path" ] || { echo "missing required path: $ports_path" >&2; exit 1; };
+        printf "%s\n" "$ports_path"') &&
+        rsync -av dist/EmuDeck/Grout.sh "steamdeck:${ports_path}/" &&
+        rsync -av --delete dist/EmuDeck/Grout/ "steamdeck:${ports_path}/Grout/"
     silent: true
-
   knulli:
     desc: Deploy to Knulli device via ADB
     cmds:

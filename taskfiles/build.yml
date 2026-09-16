@@ -23,6 +23,7 @@ tasks:
       - echo "Extracting {{.BUILD_DIR}}..."
       - docker cp {{.CONTAINER_NAME}}-{{.BUILD_DIR}}:/build/grout {{.BUILD_DIR}}/grout
       - 'if [ -n "{{.LIB_PATH}}" ]; then docker cp {{.CONTAINER_NAME}}-{{.BUILD_DIR}}:{{.LIB_PATH}} {{.BUILD_DIR}}/lib/libSDL2_gfx-1.0.so.0; fi'
+      - 'if [ -n "{{.EXTRA_LIBS}}" ]; then for entry in {{.EXTRA_LIBS}}; do src="${entry%%:*}"; dst="${entry##*:}"; docker cp "{{.CONTAINER_NAME}}-{{.BUILD_DIR}}:${src}" "{{.BUILD_DIR}}/lib/${dst}"; done; fi'
       - docker rm {{.CONTAINER_NAME}}-{{.BUILD_DIR}} >/dev/null 2>&1
       - docker image prune --filter "label={{.LABEL}}" -f >/dev/null 2>&1 || true
       - echo "Extract {{.BUILD_DIR}} complete"
@@ -43,7 +44,16 @@ tasks:
       - task: _build
         vars: { PLATFORM: linux/amd64, BUILD_DIR: build, IMAGE_TAG: "{{.IMAGE_NAME}}-amd64", DOCKERFILE: docker/Dockerfile }
       - task: _extract
-        vars: { BUILD_DIR: build, IMAGE_TAG: "{{.IMAGE_NAME}}-amd64", LIB_PATH: /usr/lib/x86_64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2 }
+        vars:
+          BUILD_DIR: build
+          IMAGE_TAG: "{{.IMAGE_NAME}}-amd64"
+          LIB_PATH: /usr/lib/x86_64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2
+          EXTRA_LIBS: >-
+            /usr/lib/x86_64-linux-gnu/libSDL2_image-2.0.so.0.2.3:libSDL2_image-2.0.so.0
+            /usr/lib/x86_64-linux-gnu/libjpeg.so.62.3.0:libjpeg.so.62
+            /usr/lib/x86_64-linux-gnu/libtiff.so.5.6.0:libtiff.so.5
+            /usr/lib/x86_64-linux-gnu/libwebp.so.6.0.2:libwebp.so.6
+            /usr/lib/x86_64-linux-gnu/libjbig.so.0:libjbig.so.0
 
   x86:
     desc: Build and extract for x86 (32-bit)
