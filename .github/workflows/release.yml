@@ -145,12 +145,14 @@ jobs:
         env:
           GROUT_VERSION: ${{ needs.prepare.outputs.version }}
 
-      - name: Package Batocera AMD64
-        run: task package:batocera-amd64
+      - name: Package AMD64 platforms
+        run: task package:batocera-amd64 package:emudeck package:retrodeck
 
-      - name: Create distribution
+      - name: Create distributions
         run: |
-          cd dist/Batocera-amd64 && zip -r ../Grout-Batocera-amd64.zip Grout.sh Grout
+          cd dist/Batocera-amd64 && zip -r ../Grout-Batocera-amd64.zip Grout.sh Grout && cd ../..
+          cd dist/EmuDeck && zip -r ../Grout-EmuDeck.zip Grout.sh Grout && cd ../..
+          cd dist/RetroDeck && zip -r ../Grout-RetroDeck.zip Grout.sh Grout && cd ../..
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -158,6 +160,8 @@ jobs:
           name: amd64-artifacts
           path: |
             dist/Grout-Batocera-amd64.zip
+            dist/Grout-EmuDeck.zip
+            dist/Grout-RetroDeck.zip
 
   build-x86:
     needs: prepare
@@ -315,6 +319,8 @@ jobs:
             **/Grout-Batocera-arm64.zip
             **/Grout-Batocera-x86.zip
             **/Grout-Batocera-amd64.zip
+            **/Grout-EmuDeck.zip
+            **/Grout-RetroDeck.zip
             **/grout
           draft: false
           prerelease: ${{ inputs.beta }}
@@ -393,6 +399,8 @@ jobs:
             "Grout-MinUI.zip"
             "Grout-Batocera-arm64.zip"
             "Grout-Batocera-amd64.zip"
+            "Grout-EmuDeck.zip"
+            "Grout-RetroDeck.zip"
             "Grout-Batocera-x86.zip"
           )
 
