@@ -4,7 +4,7 @@ tasks:
 
   all:
     desc: Package for all platforms
-    deps: [ next, muos, knulli, spruce, rocknix, arkos, trimui, allium, onion, koriki, minui, batocera, batocera-x86, batocera-amd64, emudeck ]
+    deps: [ next, muos, knulli, spruce, rocknix, arkos, trimui, allium, onion, koriki, minui, batocera, batocera-x86, batocera-amd64, emudeck, retrodeck ]
     cmds:
       - echo "Packaging complete (15 platforms)"
     silent: true
@@ -168,3 +168,12 @@ tasks:
       - chmod a+x dist/EmuDeck/Grout/grout dist/EmuDeck/Grout.sh
     silent: true
 
+  retrodeck:
+    cmds:
+      - rm -rf dist/RetroDeck
+      - mkdir -p dist/RetroDeck/Grout/lib
+      - cp scripts/RetroDeck/Grout.sh dist/RetroDeck/
+      - cp build/grout scripts/RetroDeck/logo.png README.md LICENSE dist/RetroDeck/Grout/
+      - cp -R build/lib/* dist/RetroDeck/Grout/lib/
+      - chmod a+x dist/RetroDeck/Grout/grout dist/RetroDeck/Grout.sh
+    silent: true
