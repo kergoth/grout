@@ -33,5 +33,8 @@ func cleanup() {
 		gaba.GetLogger().Error("Failed to clean .tmp directory", "error", err)
 	}
 	update.CleanupUpdateArtifacts()
-	gaba.Close()
+	func() {
+		defer func() { recover() }() //nolint:errcheck
+		gaba.Close()
+	}()
 }

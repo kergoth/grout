@@ -215,7 +215,6 @@ func handleFirstLaunch(config *internal.Config, isFirstLaunch bool, logger *slog
 	loginConfig, loginErr := ui.LoginFlow(romm.Host{})
 	if loginErr != nil {
 		logger.Error("Login flow failed", "error", loginErr)
-		gaba.Close()
 		log.SetOutput(os.Stderr)
 		log.Fatalf("Login failed: %v", loginErr)
 	}
@@ -353,7 +352,6 @@ func connectAndLoadPlatforms(config *internal.Config, logger *slog.Logger) []rom
 			logger.Warn("Server connectivity failed", "error", connErr)
 			errorMessage := classifyStartupError(connErr)
 			if !showStartupError(i18n.Localize(errorMessage, nil)) {
-				gaba.Close()
 				os.Exit(1)
 			}
 			continue
@@ -372,7 +370,6 @@ func connectAndLoadPlatforms(config *internal.Config, logger *slog.Logger) []rom
 		logger.Error("Failed to load platforms", "error", loadErr)
 		if !showStartupError(i18n.Localize(classifyStartupError(loadErr), nil)) {
 			logger.Info("User chose to quit after startup error")
-			gaba.Close()
 			os.Exit(1)
 		}
 		logger.Info("User chose to retry connection")
@@ -396,7 +393,6 @@ func handleAuthFailure(config *internal.Config, logger *slog.Logger) *internal.C
 	loginConfig, loginErr := ui.LoginFlow(config.Hosts[0])
 	if loginErr != nil {
 		logger.Error("Re-login failed", "error", loginErr)
-		gaba.Close()
 		log.SetOutput(os.Stderr)
 		log.Fatalf("Login failed: %v", loginErr)
 	}
