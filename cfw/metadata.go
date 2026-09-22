@@ -48,9 +48,7 @@ func FillGamesMetadata(entries []gamelist.RomGameEntry) {
 		if err := gamelist.AddRomGamesToGamelist(entries, gamelist.GameListFileName); err != nil {
 			logger.Warn("Failed to add games to ES gamelist.xml", "error", err)
 		}
-		if GetCFW() != EmuDeck {
-			scheduleESRestart()
-		}
+		scheduleESRestart()
 	case Spruce, Allium, Onion, Koriki:
 		if err := gamelist.AddRomGamesToGamelist(entries, gamelist.MiyooGameListFileName); err != nil {
 			logger.Warn("Failed to add games to miyoogamelist.xml", "error", err)
