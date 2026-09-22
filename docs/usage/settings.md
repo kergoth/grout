@@ -91,6 +91,8 @@ options:
 ### Archived Downloads
 
 - **Prefer extracted** - Grout extracts downloaded archives after downloading. The archive is deleted after extraction.
+  Extraction layout depends on archive contents: single files land in the system ROM directory, multi-file content
+  gets a per-game folder.
 - **Prefer compressed** - Grout keeps downloaded archives as-is where the emulator can play them.
 
 Either way, some platforms override the preference: DOS and arcade games (MAME, FBNeo, Neo Geo)

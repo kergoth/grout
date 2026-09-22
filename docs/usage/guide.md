@@ -364,8 +364,11 @@ appropriate directory on your device. Press `Y` to cancel the download, or `X` t
 3. **Artwork is downloaded** - If "Download Art" is enabled in Settings, Grout downloads box art for each game to your
    artwork directory after the ROMs finish. This artwork is only displayed within Grout - it does not affect artwork shown in your CFW's game list.
 
-4. **Archived files are extracted automatically** - If "Archived Downloads" is set to "Uncompress" in Settings, Grout
-   will extract zip and 7z files to the configured ROM directory and then delete the archive.
+4. **Archived files are extracted by content shape** - With "Archived Downloads" set to "Prefer extracted",
+   Grout extracts downloaded archives based on what's inside: a single ROM file lands directly in the
+   system ROM directory, while multi-file content (ScummVM games, disc sets) gets its own game folder
+   with any redundant toplevel folder removed. DOS and arcade games are never extracted, since their
+   emulators play the archive directly.
 
 If a download fails, Grout will show you which games had problems and clean up any leftover cruft.
 

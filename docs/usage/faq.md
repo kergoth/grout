@@ -76,6 +76,9 @@ Can't find what you're looking for? [Open an issue](https://github.com/rommapp/g
 > Two cases always override the preference: DOS and arcade games keep their archive either way
 > (their emulators play the archive directly, so extracting would break them), and multi-file ROMs
 > are always unpacked (the zip is only how the server ships a folder).
+>
+> Extraction is content-aware: single-file archives become a plain ROM file, multi-file archives
+> become a per-game folder (with any redundant toplevel folder removed).
 
 > [!NOTE]
 > **What's the difference between the downloaded game indicators?**
