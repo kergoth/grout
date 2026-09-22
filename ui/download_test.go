@@ -175,3 +175,42 @@ func TestMultiFileExtractionStripsToplevel(t *testing.T) {
 		t.Error("double-nested toplevel folder was not stripped")
 	}
 }
+
+func TestResolvePostExtractionGamePathForEmuDeckScummVM(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Game Name")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "launcher.scummvm"), []byte("sky\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("CFW", "EMUDECK")
+	got := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
+	want := filepath.Join(root, "sky.scummvm", "sky.scummvm")
+	if got != want {
+		t.Fatalf("game path = %q, want %q", got, want)
+	}
+}
+
+func TestResolvePostExtractionGamePathLeavesOtherCFWsUnchanged(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Game Name")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	stubPath := filepath.Join(extractDir, "launcher.scummvm")
+	if err := os.WriteFile(stubPath, []byte("sky\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("CFW", "ROCKNIX")
+	got := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
+	if got != stubPath {
+		t.Fatalf("game path = %q, want %q", got, stubPath)
+	}
+	if _, err := os.Stat(extractDir); err != nil {
+		t.Fatalf("original directory changed: %v", err)
+	}
+}

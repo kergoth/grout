@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"grout/cfw"
+	"grout/cfw/emudeck"
 	"grout/cfw/muos"
 	"grout/internal"
 	"grout/internal/artutil"
@@ -231,7 +232,7 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 
 				// Update the gamelist entry to point to the extracted file
 				// instead of the (now deleted) temporary zip.
-				newGamePath := resolveExtractedGamePath(romDirectory, extractDir, g.FsNameNoExt)
+				newGamePath := resolvePostExtractionGamePath(gamePlatform.FSSlug, romDirectory, extractDir, g.FsNameNoExt)
 				for i, entry := range gamelistEntries {
 					if entry.Game.ID == g.ID {
 						gamelistEntries[i].GamePath = newGamePath
@@ -306,7 +307,7 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 								extractDir := filepath.Join(romDirectory, g.FsNameNoExt)
 								_, extractErr = fileutil.ExtractArchiveToFolder(archivePath, shape, extractDir, progress)
 								if extractErr == nil {
-									gamePath = resolveExtractedGamePath(romDirectory, extractDir, g.FsNameNoExt)
+									gamePath = resolvePostExtractionGamePath(gamePlatform.FSSlug, romDirectory, extractDir, g.FsNameNoExt)
 								}
 							} else {
 								gamePath, extractErr = fileutil.ExtractArchiveFlat(archivePath, shape, romDirectory, progress)
@@ -651,6 +652,21 @@ func resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt string) stri
 	}
 	logger.Debug("Multi-file ROM gamelist path falling back to extract directory (no files found)", "path", extractDir)
 	return extractDir
+}
+
+func resolvePostExtractionGamePath(fsSlug, romDirectory, extractDir, fsNameNoExt string) string {
+	if cfw.GetCFW() != cfw.EmuDeck || !strings.EqualFold(fsSlug, "scummvm") {
+		return resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt)
+	}
+
+	launcherPath, ready, err := emudeck.PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		gaba.GetLogger().Warn("Failed to prepare EmuDeck ScummVM launcher", "path", extractDir, "error", err)
+	} else if ready {
+		gaba.GetLogger().Debug("Prepared EmuDeck ScummVM launcher", "path", launcherPath)
+		return launcherPath
+	}
+	return resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt)
 }
 
 func (s *DownloadScreen) downloadArt(artDownloads []artDownload, downloadedGames []romm.Rom, headers map[string]string, progress *atomic.Float64, insecureSkipVerify bool) {
