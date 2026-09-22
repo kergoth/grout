@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"archive/zip"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"grout/internal"
@@ -135,5 +137,41 @@ func TestRouteSingleFileExtraction(t *testing.T) {
 				t.Errorf("singleFileExtractsToFolder(%+v) = %v, want %v", c.shape, got, c.wantFolder)
 			}
 		})
+	}
+}
+
+func TestMultiFileExtractionStripsToplevel(t *testing.T) {
+	dir := t.TempDir()
+	zipPath := filepath.Join(dir, "server.zip")
+
+	// Server-built zip carrying a toplevel folder
+	f, _ := os.Create(zipPath)
+	w := zip.NewWriter(f)
+	for _, name := range []string{"My Game/disc1.chd", "My Game/disc2.chd"} {
+		fw, _ := w.Create(name)
+		fw.Write([]byte("x"))
+	}
+	w.Close()
+	f.Close()
+
+	shape, err := fileutil.AnalyzeArchive(zipPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	extractDir := filepath.Join(dir, "My Game")
+	files, err := fileutil.ExtractArchiveToFolder(zipPath, shape, extractDir, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(files) != 2 {
+		t.Fatalf("got %d files, want 2", len(files))
+	}
+	for _, want := range []string{"disc1.chd", "disc2.chd"} {
+		if !fileutil.FileExists(filepath.Join(extractDir, want)) {
+			t.Errorf("expected %s directly in extract dir", want)
+		}
+	}
+	if fileutil.FileExists(filepath.Join(extractDir, "My Game")) {
+		t.Error("double-nested toplevel folder was not stripped")
 	}
 }

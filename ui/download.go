@@ -204,7 +204,13 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 			func() (interface{}, error) {
 				logger.Debug("Extracting multi-file ROM", "game", g.DisplayName, "dest", extractDir)
 
-				if err := fileutil.Unzip(tmpZipPath, extractDir, progress); err != nil {
+				shape, shapeErr := fileutil.AnalyzeArchive(tmpZipPath)
+				if shapeErr != nil {
+					logger.Error("Failed to analyze multi-file ROM archive", "game", g.DisplayName, "error", shapeErr)
+					os.Remove(tmpZipPath)
+					return nil, shapeErr
+				}
+				if _, err := fileutil.ExtractArchiveToFolder(tmpZipPath, shape, extractDir, progress); err != nil {
 					logger.Error("Failed to extract multi-file ROM", "game", g.DisplayName, "error", err)
 					os.Remove(tmpZipPath)
 					return nil, err
