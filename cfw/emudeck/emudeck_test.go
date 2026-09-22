@@ -87,84 +87,75 @@ func TestValidateConfigFailsWithoutESDE(t *testing.T) {
 	}
 }
 
-func TestPrepareScummVMLauncher(t *testing.T) {
-	tests := []struct {
-		name         string
-		stubs        map[string]string
-		wantContents string
-		wantPath     string
-		wantReady    bool
-	}{
-		{
-			name:         "renames game directory and launcher from stub",
-			stubs:        map[string]string{"launcher.scummvm": "sky\n"},
-			wantContents: "sky\n",
-			wantPath:     filepath.Join("Game Name", "sky.scummvm"),
-			wantReady:    true,
-		},
-		{
-			name:         "keeps already canonical layout",
-			stubs:        map[string]string{"sky.scummvm": "sky"},
-			wantContents: "sky",
-			wantPath:     filepath.Join("Game Name", "sky.scummvm"),
-			wantReady:    true,
-		},
-		{
-			name:      "does not derive an ID when stub is missing",
-			stubs:     nil,
-			wantReady: false,
-		},
-		{
-			name:      "does not use an empty stub",
-			stubs:     map[string]string{"launcher.scummvm": " \n"},
-			wantReady: false,
-		},
-		{
-			name:      "does not choose among multiple stubs",
-			stubs:     map[string]string{"one.scummvm": "sky", "two.scummvm": "monkey"},
-			wantReady: false,
-		},
+// Stub discovery and short-ID validation are covered by
+// internal/scummvm.FindStub's own tests. The cases below cover only
+// EmuDeck's rename policy once a stub has already been found.
+
+func TestPrepareScummVMLauncherRenamesLauncherFromStub(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Game Name")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "launcher.scummvm"), []byte("sky\n"), 0o644); err != nil {
+		t.Fatal(err)
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			root := t.TempDir()
-			extractDir := filepath.Join(root, "Game Name")
-			if err := os.MkdirAll(extractDir, 0o755); err != nil {
-				t.Fatal(err)
-			}
-			for name, contents := range tt.stubs {
-				if err := os.WriteFile(filepath.Join(extractDir, name), []byte(contents), 0o644); err != nil {
-					t.Fatal(err)
-				}
-			}
+	launcherPath, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready {
+		t.Fatal("ready = false, want true")
+	}
+	wantPath := filepath.Join(extractDir, "sky.scummvm")
+	if launcherPath != wantPath {
+		t.Fatalf("launcher path = %q, want %q", launcherPath, wantPath)
+	}
+	content, err := os.ReadFile(launcherPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "sky\n" {
+		t.Fatalf("launcher contents = %q, want %q", content, "sky\n")
+	}
+}
 
-			launcherPath, ready, err := PrepareScummVMLauncher(extractDir)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if ready != tt.wantReady {
-				t.Fatalf("ready = %v, want %v", ready, tt.wantReady)
-			}
-			if !tt.wantReady {
-				if _, err := os.Stat(extractDir); err != nil {
-					t.Fatalf("original directory changed: %v", err)
-				}
-				return
-			}
+func TestPrepareScummVMLauncherKeepsAlreadyCanonicalLayout(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Game Name")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "sky.scummvm"), []byte("sky"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
-			wantPath := filepath.Join(root, tt.wantPath)
-			if launcherPath != wantPath {
-				t.Fatalf("launcher path = %q, want %q", launcherPath, wantPath)
-			}
-			content, err := os.ReadFile(launcherPath)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if string(content) != tt.wantContents {
-				t.Fatalf("launcher contents = %q, want %q", content, tt.wantContents)
-			}
-		})
+	launcherPath, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready {
+		t.Fatal("ready = false, want true")
+	}
+	wantPath := filepath.Join(extractDir, "sky.scummvm")
+	if launcherPath != wantPath {
+		t.Fatalf("launcher path = %q, want %q", launcherPath, wantPath)
+	}
+}
+
+func TestPrepareScummVMLauncherNotReadyWhenNoStub(t *testing.T) {
+	extractDir := t.TempDir()
+
+	launcherPath, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready {
+		t.Fatal("ready = true, want false")
+	}
+	if launcherPath != "" {
+		t.Fatalf("launcher path = %q, want empty", launcherPath)
 	}
 }
 

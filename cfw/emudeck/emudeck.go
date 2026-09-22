@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"grout/internal/jsonutil"
+	"grout/internal/scummvm"
 	"log"
 	"os"
 	"path/filepath"
@@ -119,31 +120,11 @@ func GetGroutGamelist(system string) string {
 // It reports false when the source directory does not contain exactly one
 // usable stub, leaving the directory unchanged.
 func PrepareScummVMLauncher(extractDir string) (string, bool, error) {
-	entries, err := os.ReadDir(extractDir)
+	stubPath, shortID, ok, err := scummvm.FindStub(extractDir)
 	if err != nil {
-		return "", false, fmt.Errorf("read extracted ScummVM game: %w", err)
+		return "", false, err
 	}
-
-	var stubPath string
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".scummvm") {
-			continue
-		}
-		if stubPath != "" {
-			return "", false, nil
-		}
-		stubPath = filepath.Join(extractDir, entry.Name())
-	}
-	if stubPath == "" {
-		return "", false, nil
-	}
-
-	contents, err := os.ReadFile(stubPath)
-	if err != nil {
-		return "", false, fmt.Errorf("read ScummVM launcher stub: %w", err)
-	}
-	shortID := strings.TrimSpace(string(contents))
-	if shortID == "" || strings.ContainsAny(shortID, "/\\\r\n") || filepath.Base(shortID) != shortID || shortID == "." {
+	if !ok {
 		return "", false, nil
 	}
 
