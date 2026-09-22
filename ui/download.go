@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"grout/cfw"
 	"grout/cfw/emudeck"
+	"grout/cfw/knulli"
 	"grout/cfw/muos"
 	"grout/cfw/retrodeck"
 	"grout/internal"
@@ -679,6 +680,14 @@ func resolvePostExtractionGamePath(fsSlug, romDirectory, extractDir, fsNameNoExt
 		} else if ready {
 			gaba.GetLogger().Debug("Prepared RetroDECK ScummVM launcher", "path", launcherDir)
 			return launcherDir, ""
+		}
+	case cfw.Knulli:
+		stubPath, ready, err := knulli.PrepareScummVMLauncher(extractDir)
+		if err != nil {
+			gaba.GetLogger().Warn("Failed to prepare Knulli ScummVM launcher", "path", extractDir, "error", err)
+		} else if ready {
+			gaba.GetLogger().Debug("Prepared Knulli ScummVM launcher", "path", stubPath)
+			return stubPath, ""
 		}
 	}
 	return resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt), ""

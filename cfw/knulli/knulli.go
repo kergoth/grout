@@ -3,6 +3,7 @@ package knulli
 import (
 	"embed"
 	"grout/internal/jsonutil"
+	"grout/internal/scummvm"
 	"os"
 	"path/filepath"
 )
@@ -52,4 +53,22 @@ func GetManualDirectory(romDir string) string {
 
 func GetBezelDirectory(romDir string) string {
 	return filepath.Join(romDir, "bezels")
+}
+
+// PrepareScummVMLauncher locates an extracted ScummVM game's launcher stub
+// for Knulli's manual-add convention: a top-level game folder containing a
+// single ".scummvm" file whose contents are the ScummVM short ID. Knulli
+// accepts any filename for the stub, so unlike EmuDeck and RetroDECK, no
+// renaming is needed; the gamelist entry can point directly at the stub
+// wherever it already is. It reports false, leaving extractDir unchanged,
+// when extractDir does not contain exactly one usable stub.
+func PrepareScummVMLauncher(extractDir string) (string, bool, error) {
+	stubPath, _, ok, err := scummvm.FindStub(extractDir)
+	if err != nil {
+		return "", false, err
+	}
+	if !ok {
+		return "", false, nil
+	}
+	return stubPath, true, nil
 }
