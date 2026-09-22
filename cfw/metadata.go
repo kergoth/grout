@@ -6,7 +6,6 @@ import (
 	"grout/cfw/emudeck"
 	"grout/cfw/knulli"
 	"grout/cfw/muos"
-	"grout/cfw/retrodeck"
 	"grout/cfw/rocknix"
 	"grout/internal/emulationstation"
 	"grout/internal/gamelist"
@@ -33,13 +32,6 @@ func AddGroutToGamelist(c CFW) {
 		gamelist.AddGroutEntry(batocera.GetGroutGamelist(), "./Grout/Grout.sh")
 	case EmuDeck:
 		gamelist.AddGroutEntry(emudeck.GetGroutGamelist("ports"), "./Grout.sh")
-	case RetroDeck:
-		// RetroDECK disables the "Shortcut or script" and "AppImage" launch
-		// commands on its "ports" system (only RetroArch source-port cores
-		// remain), so a plain shell script there gets launched through
-		// whatever RetroArch core happens to be first instead of running
-		// directly. "desktop" keeps those commands intact.
-		gamelist.AddGroutEntry(retrodeck.GetGroutGamelist("desktop"), "./Grout.sh")
 	default:
 		return
 	}

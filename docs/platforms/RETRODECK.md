@@ -1,6 +1,10 @@
 # RetroDECK Platform Paths
 
-Grout runs as an ES-DE port on Steam Deck systems configured with [RetroDECK][retrodeck].
+Grout runs as a non-Steam game on Steam Deck systems configured with [RetroDECK][retrodeck]; see
+[Installation Guide for Steam Deck / RetroDECK](../getting-started/install-retrodeck.md). It reads
+RetroDECK's own configuration to resolve paths, and writes downloaded games into RetroDECK's ES-DE
+gamelist.xml so they're playable from RetroDECK's library, but Grout itself is not launched
+through ES-DE.
 
 ## Configuration
 

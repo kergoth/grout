@@ -20,11 +20,6 @@ func TestAddGroutToGamelist(t *testing.T) {
 			cfw:          EmuDeck,
 			expectedPath: filepath.Join("ES-DE", "gamelists", "ports", "gamelist.xml"),
 		},
-		{
-			name:         "retrodeck desktop gamelist",
-			cfw:          RetroDeck,
-			expectedPath: filepath.Join(".var", "app", "net.retrodeck.retrodeck", "config", "ES-DE", "gamelists", "desktop", "gamelist.xml"),
-		},
 	}
 
 	for _, tc := range tests {
@@ -47,6 +42,21 @@ func TestAddGroutToGamelist(t *testing.T) {
 				t.Fatalf("missing grout launcher path in gamelist: %s", content)
 			}
 		})
+	}
+}
+
+// Grout installs on RetroDECK as a non-Steam game (see
+// docs/getting-started/install-retrodeck.md), not as an ES-DE port, so it
+// must not register itself in RetroDECK's ES-DE gamelist.xml.
+func TestAddGroutToGamelistRetroDeckIsNoOp(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	AddGroutToGamelist(RetroDeck)
+
+	gamelistPath := filepath.Join(home, ".var", "app", "net.retrodeck.retrodeck", "config", "ES-DE", "gamelists", "desktop", "gamelist.xml")
+	if _, err := os.Stat(gamelistPath); !os.IsNotExist(err) {
+		t.Fatalf("expected no gamelist to be written for RetroDeck, got err=%v", err)
 	}
 }
 
