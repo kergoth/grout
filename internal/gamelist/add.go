@@ -34,6 +34,7 @@ type RomGameEntry struct {
 	Game         *romm.Rom
 	ArtLocation  artLocation
 	GamePath     string
+	FolderLink   string
 	RomDirectory string
 	Platform     *romm.Platform
 	GamelistPath string
@@ -89,6 +90,9 @@ func (gl *GameList) AddRomGame(entry RomGameEntry) {
 	if entry.GamePath != "" {
 		gameMetadata[PathElement] = entry.GamePath
 	}
+	if entry.FolderLink != "" {
+		gameMetadata[FolderLinkElement] = entry.FolderLink
+	}
 
 	maxPlayers := entry.Game.MaxPlayerCount()
 	if maxPlayers > 1 {
@@ -129,7 +133,11 @@ func (gl *GameList) AddRomGame(entry RomGameEntry) {
 		gameMetadata[CheevosHashElement] = entry.Game.RetroAchievementsHash
 	}
 
-	gl.AdddOrUpdateEntry(entry.Game.Name, gameMetadata)
+	if entry.FolderLink != "" {
+		gl.AddOrUpdateFolderEntry(entry.Game.Name, gameMetadata)
+	} else {
+		gl.AdddOrUpdateEntry(entry.Game.Name, gameMetadata)
+	}
 }
 
 func AddRomGamesToGamelist(entry []RomGameEntry, gamelistFilename FileName) error {

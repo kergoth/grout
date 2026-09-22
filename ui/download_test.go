@@ -187,10 +187,12 @@ func TestResolvePostExtractionGamePathForEmuDeckScummVM(t *testing.T) {
 	}
 
 	t.Setenv("CFW", "EMUDECK")
-	got := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
-	want := filepath.Join(root, "sky.scummvm", "sky.scummvm")
-	if got != want {
-		t.Fatalf("game path = %q, want %q", got, want)
+	gamePath, folderLink := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
+	if gamePath != extractDir {
+		t.Fatalf("game path = %q, want %q", gamePath, extractDir)
+	}
+	if folderLink != "sky.scummvm" {
+		t.Fatalf("folder link = %q, want %q", folderLink, "sky.scummvm")
 	}
 }
 
@@ -206,9 +208,12 @@ func TestResolvePostExtractionGamePathLeavesOtherCFWsUnchanged(t *testing.T) {
 	}
 
 	t.Setenv("CFW", "ROCKNIX")
-	got := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
-	if got != stubPath {
-		t.Fatalf("game path = %q, want %q", got, stubPath)
+	gamePath, folderLink := resolvePostExtractionGamePath("scummvm", root, extractDir, "Game Name")
+	if gamePath != stubPath {
+		t.Fatalf("game path = %q, want %q", gamePath, stubPath)
+	}
+	if folderLink != "" {
+		t.Fatalf("folder link = %q, want empty", folderLink)
 	}
 	if _, err := os.Stat(extractDir); err != nil {
 		t.Fatalf("original directory changed: %v", err)

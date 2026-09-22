@@ -99,14 +99,14 @@ func TestPrepareScummVMLauncher(t *testing.T) {
 			name:         "renames game directory and launcher from stub",
 			stubs:        map[string]string{"launcher.scummvm": "sky\n"},
 			wantContents: "sky\n",
-			wantPath:     filepath.Join("sky.scummvm", "sky.scummvm"),
+			wantPath:     filepath.Join("Game Name", "sky.scummvm"),
 			wantReady:    true,
 		},
 		{
 			name:         "keeps already canonical layout",
 			stubs:        map[string]string{"sky.scummvm": "sky"},
 			wantContents: "sky",
-			wantPath:     filepath.Join("sky.scummvm", "sky.scummvm"),
+			wantPath:     filepath.Join("Game Name", "sky.scummvm"),
 			wantReady:    true,
 		},
 		{
@@ -168,7 +168,7 @@ func TestPrepareScummVMLauncher(t *testing.T) {
 	}
 }
 
-func TestPrepareScummVMLauncherLeavesSourceWhenDestinationExists(t *testing.T) {
+func TestPrepareScummVMLauncherLeavesSourceWhenLauncherDestinationExists(t *testing.T) {
 	root := t.TempDir()
 	extractDir := filepath.Join(root, "Game Name")
 	stubPath := filepath.Join(extractDir, "launcher.scummvm")
@@ -178,7 +178,7 @@ func TestPrepareScummVMLauncherLeavesSourceWhenDestinationExists(t *testing.T) {
 	if err := os.WriteFile(stubPath, []byte("sky"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Mkdir(filepath.Join(root, "sky.scummvm"), 0o755); err != nil {
+	if err := os.Mkdir(filepath.Join(extractDir, "sky.scummvm"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 

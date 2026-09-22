@@ -13,6 +13,8 @@ const (
 	PathElement        = "path"
 	GameListElement    = "gameList"
 	GameElement        = "game"
+	FolderElement      = "folder"
+	FolderLinkElement  = "folderlink"
 	ReleaseDateElement = "releasedate"
 	DeveloperElement   = "developer"
 	PublisherElement   = "publisher"
@@ -110,15 +112,18 @@ func (gl *GameList) Contains(element, value string) bool {
 }
 
 func (gl *GameList) GetGameElementByName(name string) *etree.Element {
+	return gl.getElementByName(GameElement, name)
+}
+
+func (gl *GameList) getElementByName(elementName, name string) *etree.Element {
 	root := gl.root()
 	if root == nil {
 		return nil
 	}
-	games := root.SelectElements(GameElement)
-	for _, game := range games {
-		nameElement := game.FindElement(NameElement)
+	for _, entry := range root.SelectElements(elementName) {
+		nameElement := entry.FindElement(NameElement)
 		if nameElement != nil && nameElement.Text() == name {
-			return game
+			return entry
 		}
 	}
 	return nil
@@ -163,33 +168,53 @@ func (gl *GameList) Save(path string) error {
 }
 
 func (gl *GameList) AddGameEntry(info map[string]string) {
+	gl.addEntry(GameElement, info)
+}
+
+func (gl *GameList) addEntry(elementName string, info map[string]string) {
 	root := gl.root()
 	if root == nil {
 		gl.document = emptyGameList()
 		root = gl.root()
 	}
-	newGame := root.CreateElement(GameElement)
+	entry := root.CreateElement(elementName)
 
 	for key, value := range info {
-		newGame.CreateElement(key).SetText(value)
+		entry.CreateElement(key).SetText(value)
 	}
 }
 
 func (gl *GameList) AdddOrUpdateEntry(name string, info map[string]string) {
-	game := gl.GetGameElementByName(name)
-	if game == nil {
-		gl.AddGameEntry(info)
+	gl.removeEntryByName(FolderElement, name)
+	gl.addOrUpdateEntry(GameElement, name, info)
+}
+
+func (gl *GameList) AddOrUpdateFolderEntry(name string, info map[string]string) {
+	gl.removeEntryByName(GameElement, name)
+	gl.addOrUpdateEntry(FolderElement, name, info)
+}
+
+func (gl *GameList) removeEntryByName(elementName, name string) {
+	entry := gl.getElementByName(elementName, name)
+	if entry != nil {
+		gl.root().RemoveChild(entry)
+	}
+}
+
+func (gl *GameList) addOrUpdateEntry(elementName, name string, info map[string]string) {
+	entry := gl.getElementByName(elementName, name)
+	if entry == nil {
+		gl.addEntry(elementName, info)
 		return
 	}
 
 	for key, value := range info {
-		if element := game.FindElement(key); element != nil {
+		if element := entry.FindElement(key); element != nil {
 			element.SetText(value)
 		} else {
-			game.CreateElement(key).SetText(value)
+			entry.CreateElement(key).SetText(value)
 		}
 	}
-
 }
 
 func (gl *GameList) SetGameID(name, id string) {

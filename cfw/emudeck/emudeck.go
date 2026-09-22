@@ -114,8 +114,8 @@ func GetGroutGamelist(system string) string {
 	return filepath.Join(os.Getenv("HOME"), "ES-DE", "gamelists", system, "gamelist.xml")
 }
 
-// PrepareScummVMLauncher converts an extracted ScummVM game with one populated
-// launcher stub to EmuDeck's <shortid>.scummvm/<shortid>.scummvm layout.
+// PrepareScummVMLauncher renames an extracted ScummVM game's populated launcher
+// stub to <shortid>.scummvm, retaining the game-name directory for ES-DE.
 // It reports false when the source directory does not contain exactly one
 // usable stub, leaving the directory unchanged.
 func PrepareScummVMLauncher(extractDir string) (string, bool, error) {
@@ -149,32 +149,12 @@ func PrepareScummVMLauncher(extractDir string) (string, bool, error) {
 
 	launcherName := shortID + ".scummvm"
 	launcherPath := filepath.Join(extractDir, launcherName)
-	targetDir := filepath.Join(filepath.Dir(extractDir), launcherName)
-	if targetDir != extractDir {
-		if _, err := os.Stat(targetDir); err == nil {
-			return "", false, fmt.Errorf("ScummVM launcher directory already exists: %s", targetDir)
-		} else if !os.IsNotExist(err) {
-			return "", false, fmt.Errorf("stat ScummVM launcher directory: %w", err)
-		}
-	}
 	if launcherPath != stubPath {
 		if err := os.Rename(stubPath, launcherPath); err != nil {
 			return "", false, fmt.Errorf("rename ScummVM launcher stub: %w", err)
 		}
 	}
-
-	if targetDir == extractDir {
-		return launcherPath, true, nil
-	}
-	if err := os.Rename(extractDir, targetDir); err != nil {
-		if launcherPath != stubPath {
-			if rollbackErr := os.Rename(launcherPath, stubPath); rollbackErr != nil {
-				return "", false, fmt.Errorf("rename ScummVM game directory: %w (restore launcher stub: %v)", err, rollbackErr)
-			}
-		}
-		return "", false, fmt.Errorf("rename ScummVM game directory: %w", err)
-	}
-	return filepath.Join(targetDir, launcherName), true, nil
+	return launcherPath, true, nil
 }
 
 // mediaSystemDir extracts the ES-DE system name from a ROM directory path.
