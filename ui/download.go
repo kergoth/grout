@@ -55,6 +55,22 @@ type artDownload struct {
 	IsImage  bool
 }
 
+// shouldExtractSingleFileDownload decides whether a downloaded single-file
+// archive is packaging to be unpacked or the playable artifact itself.
+// Platforms whose emulators mount archives directly (DOS, arcade) keep the
+// file; everything else extracts when the user enabled "Uncompress".
+//
+// Known gap: multi-file DOS ROMs (HasMultipleFiles) always take the
+// server-built-zip extraction path and are unpacked into a game folder,
+// which DOSBox Pure cannot mount. Handling those as archive-as-rom is a
+// deferred extension.
+func shouldExtractSingleFileDownload(unzipDownloads bool, fsSlug string) bool {
+	if !unzipDownloads {
+		return false
+	}
+	return !fileutil.UsesArchiveAsRom(fsSlug)
+}
+
 func NewDownloadScreen() *DownloadScreen {
 	return &DownloadScreen{}
 }
@@ -228,6 +244,19 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 				return d.DisplayName == g.Name
 			})
 			if !completed {
+				continue
+			}
+
+			gamePlatformForExtract := input.Platform
+			if input.Platform.ID == 0 && g.PlatformID != 0 {
+				gamePlatformForExtract = romm.Platform{
+					ID:     g.PlatformID,
+					FSSlug: g.PlatformFSSlug,
+					Name:   g.PlatformDisplayName,
+				}
+			}
+			if !shouldExtractSingleFileDownload(input.Config.UnzipDownloads, gamePlatformForExtract.FSSlug) {
+				logger.Debug("Keeping archive as ROM", "game", g.Name, "platform", gamePlatformForExtract.FSSlug)
 				continue
 			}
 

@@ -89,3 +89,29 @@ func TestBuildDownloads_SingleFile_HappyPath(t *testing.T) {
 		t.Error("expected non-empty download URL")
 	}
 }
+
+func TestShouldExtractSingleFileDownload(t *testing.T) {
+	cases := []struct {
+		name           string
+		unzipDownloads bool
+		fsSlug         string
+		want           bool
+	}{
+		{"uncompress on, regular platform", true, "snes", true},
+		{"uncompress on, dos", true, "dos", false},
+		{"uncompress on, arcade", true, "arcade", false},
+		{"uncompress on, neogeo alias", true, "neogeocd", false},
+		{"uncompress on, scummvm still extracts", true, "scummvm", true},
+		{"uncompress off, regular platform", false, "snes", false},
+		{"uncompress off, dos", false, "dos", false},
+		{"uncompress on, empty slug extracts", true, "", true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := shouldExtractSingleFileDownload(c.unzipDownloads, c.fsSlug); got != c.want {
+				t.Errorf("shouldExtractSingleFileDownload(%v, %q) = %v, want %v",
+					c.unzipDownloads, c.fsSlug, got, c.want)
+			}
+		})
+	}
+}
