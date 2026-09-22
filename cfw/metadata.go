@@ -34,7 +34,12 @@ func AddGroutToGamelist(c CFW) {
 	case EmuDeck:
 		gamelist.AddGroutEntry(emudeck.GetGroutGamelist("ports"), "./Grout.sh")
 	case RetroDeck:
-		gamelist.AddGroutEntry(retrodeck.GetGroutGamelist("ports"), "./Grout.sh")
+		// RetroDECK disables the "Shortcut or script" and "AppImage" launch
+		// commands on its "ports" system (only RetroArch source-port cores
+		// remain), so a plain shell script there gets launched through
+		// whatever RetroArch core happens to be first instead of running
+		// directly. "desktop" keeps those commands intact.
+		gamelist.AddGroutEntry(retrodeck.GetGroutGamelist("desktop"), "./Grout.sh")
 	default:
 		return
 	}

@@ -21,9 +21,9 @@ func TestAddGroutToGamelist(t *testing.T) {
 			expectedPath: filepath.Join("ES-DE", "gamelists", "ports", "gamelist.xml"),
 		},
 		{
-			name:         "retrodeck ports gamelist",
+			name:         "retrodeck desktop gamelist",
 			cfw:          RetroDeck,
-			expectedPath: filepath.Join(".var", "app", "net.retrodeck.retrodeck", "config", "ES-DE", "gamelists", "ports", "gamelist.xml"),
+			expectedPath: filepath.Join(".var", "app", "net.retrodeck.retrodeck", "config", "ES-DE", "gamelists", "desktop", "gamelist.xml"),
 		},
 	}
 

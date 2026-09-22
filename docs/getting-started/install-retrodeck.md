@@ -17,10 +17,16 @@ This guide covers installing Grout as an ES-DE port on a Steam Deck using [Retro
 
 1. Download the [latest Grout release](https://github.com/rommapp/grout/releases/latest/download/Grout-RetroDeck.zip) for RetroDECK.
 2. Unzip the archive.
-3. Copy the `Grout` folder and `Grout.sh` to the RetroDECK ports directory. The default location is `~/retrodeck/roms/ports/`.
+3. Copy the `Grout` folder and `Grout.sh` to the RetroDECK desktop directory. The default location is `~/retrodeck/roms/desktop/`.
    If RetroDECK is installed on an SD card, check `retrodeck.json` for `roms_path`.
 4. Restart ES-DE inside RetroDECK or refresh its game list.
-5. Start Grout from the `Ports` system.
+5. Start Grout from the `Desktop Applications` system.
+
+!!! important
+    Don't place Grout in the `Ports` directory. RetroDECK disables that system's
+    "Shortcut or script" and "AppImage" launch commands, leaving only RetroArch
+    source-port cores (e.g. ECWolf) as the default emulator, so a plain shell
+    script placed there won't run.
 
 ## Important Configuration
 
@@ -36,7 +42,7 @@ Launch Grout, open `Settings`, and select `Check for Updates`.
 
 ### Manual Update
 
-Download the latest release and replace the `Grout` folder and `Grout.sh` in the ports directory. Keep `config.json` to preserve the server configuration.
+Download the latest release and replace the `Grout` folder and `Grout.sh` in the desktop directory. Keep `config.json` to preserve the server configuration.
 
 ## Next Steps
 

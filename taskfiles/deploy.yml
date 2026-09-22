@@ -43,19 +43,19 @@ tasks:
     silent: true
 
   retrodeck:
-    desc: Deploy to Steam Deck via SSH (RetroDECK ports)
+    desc: Deploy to Steam Deck via SSH (RetroDECK desktop)
     cmds:
       - >-
-        ports_path=$(ssh steamdeck 'set -eu;
+        desktop_path=$(ssh steamdeck 'set -eu;
         cfg="$HOME/.var/app/net.retrodeck.retrodeck/config/retrodeck/retrodeck.json";
         [ -f "$cfg" ] || { echo "missing required path: $cfg" >&2; exit 1; };
         roms_path=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get(\"paths\",{}).get(\"roms_path\",\"\"))" "$cfg");
         [ -n "$roms_path" ] || { echo "missing required value: paths.roms_path in $cfg" >&2; exit 1; };
-        ports_path="$roms_path/ports";
-        [ -d "$ports_path" ] || { echo "missing required path: $ports_path" >&2; exit 1; };
-        printf "%s\n" "$ports_path"') &&
-        rsync -av dist/RetroDeck/Grout.sh "steamdeck:${ports_path}/" &&
-        rsync -av --delete dist/RetroDeck/Grout/ "steamdeck:${ports_path}/Grout/"
+        desktop_path="$roms_path/desktop";
+        [ -d "$desktop_path" ] || { echo "missing required path: $desktop_path" >&2; exit 1; };
+        printf "%s\n" "$desktop_path"') &&
+        rsync -av dist/RetroDeck/Grout.sh "steamdeck:${desktop_path}/" &&
+        rsync -av --delete dist/RetroDeck/Grout/ "steamdeck:${desktop_path}/Grout/"
     silent: true
 
   knulli:
