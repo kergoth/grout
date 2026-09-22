@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"grout/internal/jsonutil"
+	"grout/internal/scummvm"
 )
 
 //go:embed data/*.json
@@ -142,6 +143,48 @@ func GetFanartDirectory(romDir string) string {
 
 func GetGroutGamelist(system string) string {
 	return filepath.Join(esdeConfigDir(), "gamelists", system, "gamelist.xml")
+}
+
+// PrepareScummVMLauncher converts an extracted ScummVM game directory into
+// RetroDECK's documented layout: the game directory itself is suffixed
+// ".scummvm" and the launcher stub inside it is renamed to match, so ES-DE's
+// folder-as-file resolution finds "<Game Name>.scummvm/<Game
+// Name>.scummvm". It reports false, leaving extractDir unchanged, when
+// extractDir does not contain exactly one usable stub.
+func PrepareScummVMLauncher(extractDir string) (string, bool, error) {
+	stubPath, _, ok, err := scummvm.FindStub(extractDir)
+	if err != nil {
+		return "", false, err
+	}
+	if !ok {
+		return "", false, nil
+	}
+	stubName := filepath.Base(stubPath)
+
+	gameName := filepath.Base(extractDir)
+	launcherName := gameName + ".scummvm"
+	launcherDir := extractDir + ".scummvm"
+
+	if extractDir != launcherDir {
+		if err := os.Rename(extractDir, launcherDir); err != nil {
+			return "", false, fmt.Errorf("rename ScummVM game directory: %w", err)
+		}
+	}
+
+	if stubName != launcherName {
+		oldStubPath := filepath.Join(launcherDir, stubName)
+		newStubPath := filepath.Join(launcherDir, launcherName)
+		if err := os.Rename(oldStubPath, newStubPath); err != nil {
+			if extractDir != launcherDir {
+				if rollbackErr := os.Rename(launcherDir, extractDir); rollbackErr != nil {
+					return "", false, fmt.Errorf("rename ScummVM launcher stub: %w (and rollback failed: %v)", err, rollbackErr)
+				}
+			}
+			return "", false, fmt.Errorf("rename ScummVM launcher stub: %w", err)
+		}
+	}
+
+	return launcherDir, true, nil
 }
 
 // mediaSystemDir extracts the ES-DE system name from a ROM directory path.

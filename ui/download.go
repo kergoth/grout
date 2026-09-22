@@ -7,6 +7,7 @@ import (
 	"grout/cfw"
 	"grout/cfw/emudeck"
 	"grout/cfw/muos"
+	"grout/cfw/retrodeck"
 	"grout/internal"
 	"grout/internal/artutil"
 	"grout/internal/fileutil"
@@ -658,16 +659,27 @@ func resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt string) stri
 }
 
 func resolvePostExtractionGamePath(fsSlug, romDirectory, extractDir, fsNameNoExt string) (string, string) {
-	if cfw.GetCFW() != cfw.EmuDeck || !strings.EqualFold(fsSlug, "scummvm") {
+	if !strings.EqualFold(fsSlug, "scummvm") {
 		return resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt), ""
 	}
 
-	launcherPath, ready, err := emudeck.PrepareScummVMLauncher(extractDir)
-	if err != nil {
-		gaba.GetLogger().Warn("Failed to prepare EmuDeck ScummVM launcher", "path", extractDir, "error", err)
-	} else if ready {
-		gaba.GetLogger().Debug("Prepared EmuDeck ScummVM launcher", "path", launcherPath)
-		return extractDir, filepath.Base(launcherPath)
+	switch cfw.GetCFW() {
+	case cfw.EmuDeck:
+		launcherPath, ready, err := emudeck.PrepareScummVMLauncher(extractDir)
+		if err != nil {
+			gaba.GetLogger().Warn("Failed to prepare EmuDeck ScummVM launcher", "path", extractDir, "error", err)
+		} else if ready {
+			gaba.GetLogger().Debug("Prepared EmuDeck ScummVM launcher", "path", launcherPath)
+			return extractDir, filepath.Base(launcherPath)
+		}
+	case cfw.RetroDeck:
+		launcherDir, ready, err := retrodeck.PrepareScummVMLauncher(extractDir)
+		if err != nil {
+			gaba.GetLogger().Warn("Failed to prepare RetroDECK ScummVM launcher", "path", extractDir, "error", err)
+		} else if ready {
+			gaba.GetLogger().Debug("Prepared RetroDECK ScummVM launcher", "path", launcherDir)
+			return launcherDir, ""
+		}
 	}
 	return resolveExtractedGamePath(romDirectory, extractDir, fsNameNoExt), ""
 }

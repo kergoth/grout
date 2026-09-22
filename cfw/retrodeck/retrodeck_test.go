@@ -266,3 +266,115 @@ func TestGetGroutGamelist(t *testing.T) {
 		t.Fatalf("GetGroutGamelist() = %q, want %q", got, expected)
 	}
 }
+
+// Stub discovery and short-ID validation are covered by
+// internal/scummvm.FindStub's own tests. The cases below cover only
+// RetroDECK's folder-plus-stub rename policy once a stub has already been
+// found.
+
+func TestPrepareScummVMLauncherRenamesDirectoryAndStub(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Beneath a Steel Sky")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "launcher.scummvm"), []byte("sky"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	launcherDir, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready {
+		t.Fatal("ready = false, want true")
+	}
+	wantDir := filepath.Join(root, "Beneath a Steel Sky.scummvm")
+	if launcherDir != wantDir {
+		t.Fatalf("launcher dir = %q, want %q", launcherDir, wantDir)
+	}
+	wantStub := filepath.Join(wantDir, "Beneath a Steel Sky.scummvm")
+	content, err := os.ReadFile(wantStub)
+	if err != nil {
+		t.Fatalf("read renamed stub: %v", err)
+	}
+	if string(content) != "sky" {
+		t.Fatalf("stub contents = %q, want %q", content, "sky")
+	}
+	if _, err := os.Stat(extractDir); !os.IsNotExist(err) {
+		t.Fatalf("original directory still exists: %v", err)
+	}
+}
+
+func TestPrepareScummVMLauncherKeepsAlreadyCanonicalLayout(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Beneath a Steel Sky")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "Beneath a Steel Sky.scummvm"), []byte("sky"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	launcherDir, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready {
+		t.Fatal("ready = false, want true")
+	}
+	wantDir := filepath.Join(root, "Beneath a Steel Sky.scummvm")
+	if launcherDir != wantDir {
+		t.Fatalf("launcher dir = %q, want %q", launcherDir, wantDir)
+	}
+}
+
+func TestPrepareScummVMLauncherNotReadyWhenNoStub(t *testing.T) {
+	extractDir := t.TempDir()
+
+	launcherDir, ready, err := PrepareScummVMLauncher(extractDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready {
+		t.Fatal("ready = true, want false")
+	}
+	if launcherDir != "" {
+		t.Fatalf("launcher dir = %q, want empty", launcherDir)
+	}
+	if _, err := os.Stat(extractDir); err != nil {
+		t.Fatalf("original directory changed: %v", err)
+	}
+}
+
+func TestPrepareScummVMLauncherLeavesSourceWhenStubRenameFails(t *testing.T) {
+	root := t.TempDir()
+	extractDir := filepath.Join(root, "Beneath a Steel Sky")
+	if err := os.MkdirAll(extractDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extractDir, "launcher.scummvm"), []byte("sky"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// A directory already occupying the stub's rename destination makes the
+	// outer directory rename succeed but the inner stub rename fail
+	// (renaming a file onto an existing directory always fails), exercising
+	// the rollback path.
+	if err := os.MkdirAll(filepath.Join(extractDir, "Beneath a Steel Sky.scummvm"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	launcherDir, ready, err := PrepareScummVMLauncher(extractDir)
+	if err == nil {
+		t.Fatal("expected stub rename to fail")
+	}
+	if ready {
+		t.Fatal("launcher reported ready after rename failure")
+	}
+	if launcherDir != "" {
+		t.Fatalf("launcher dir = %q, want empty", launcherDir)
+	}
+	if _, err := os.Stat(extractDir); err != nil {
+		t.Fatalf("source directory not rolled back: %v", err)
+	}
+}
