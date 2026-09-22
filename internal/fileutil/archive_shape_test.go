@@ -73,3 +73,101 @@ func TestAnalyzeArchive(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractArchiveFlat(t *testing.T) {
+	t.Run("flat single file", func(t *testing.T) {
+		src := writeZip(t, "game.sfc")
+		shape, _ := AnalyzeArchive(src)
+		dest := t.TempDir()
+		out, err := ExtractArchiveFlat(src, shape, dest, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if filepath.Base(out) != "game.sfc" || filepath.Dir(out) != dest {
+			t.Errorf("got %q, want %s/game.sfc", out, dest)
+		}
+	})
+
+	t.Run("strips toplevel folder", func(t *testing.T) {
+		src := writeZip(t, "Game Name/game.sfc")
+		shape, _ := AnalyzeArchive(src)
+		dest := t.TempDir()
+		out, err := ExtractArchiveFlat(src, shape, dest, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if filepath.Base(out) != "game.sfc" || filepath.Dir(out) != dest {
+			t.Errorf("got %q, want %s/game.sfc", out, dest)
+		}
+	})
+
+	t.Run("rejects multi-file", func(t *testing.T) {
+		src := writeZip(t, "a.sfc", "b.sfc")
+		shape, _ := AnalyzeArchive(src)
+		if _, err := ExtractArchiveFlat(src, shape, t.TempDir(), nil); err == nil {
+			t.Error("expected error for multi-file archive")
+		}
+	})
+}
+
+func TestExtractArchiveToFolder(t *testing.T) {
+	t.Run("strips single root", func(t *testing.T) {
+		src := writeZip(t, "Game/monkey.000", "Game/monkey.001")
+		shape, _ := AnalyzeArchive(src)
+		dest := t.TempDir()
+		files, err := ExtractArchiveToFolder(src, shape, dest, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(files) != 2 {
+			t.Fatalf("got %d files, want 2", len(files))
+		}
+		for _, f := range files {
+			if filepath.Dir(f) != dest {
+				t.Errorf("file %q not directly in dest", f)
+			}
+		}
+	})
+
+	t.Run("preserves multi-root structure", func(t *testing.T) {
+		src := writeZip(t, "disc1/a.bin", "disc2/b.bin")
+		shape, _ := AnalyzeArchive(src)
+		dest := t.TempDir()
+		files, err := ExtractArchiveToFolder(src, shape, dest, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(files) != 2 {
+			t.Fatalf("got %d files, want 2", len(files))
+		}
+		if !fileExists(filepath.Join(dest, "disc1", "a.bin")) || !fileExists(filepath.Join(dest, "disc2", "b.bin")) {
+			t.Errorf("expected disc1/disc2 structure preserved, got %v", files)
+		}
+	})
+
+	t.Run("skips junk", func(t *testing.T) {
+		src := writeZip(t, "Game/monkey.000", "__MACOSX/Game/._monkey.000", ".DS_Store")
+		shape, _ := AnalyzeArchive(src)
+		dest := t.TempDir()
+		files, err := ExtractArchiveToFolder(src, shape, dest, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(files) != 1 {
+			t.Errorf("got %d files, want 1 (junk skipped): %v", len(files), files)
+		}
+	})
+
+	t.Run("rejects path traversal", func(t *testing.T) {
+		src := writeZip(t, "../evil.sfc")
+		shape, _ := AnalyzeArchive(src)
+		if _, err := ExtractArchiveToFolder(src, shape, t.TempDir(), nil); err == nil {
+			t.Error("expected error for traversal entry")
+		}
+	})
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
