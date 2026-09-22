@@ -90,10 +90,13 @@ options:
 
 ### Archived Downloads
 
-Controls what happens when downloading archived ROM files (zip and 7z):
+- **Prefer extracted** - Grout extracts downloaded archives after downloading. The archive is deleted after extraction.
+- **Prefer compressed** - Grout keeps downloaded archives as-is where the emulator can play them.
 
-- **Uncompress** - Grout automatically extracts archived ROMs after downloading. The archive is deleted after extraction.
-- **Do Nothing** - Keep the downloaded archive as-is without extracting.
+Either way, some platforms override the preference: DOS and arcade games (MAME, FBNeo, Neo Geo)
+always keep their archive because their emulators play the archive file directly, and content that
+only exists as a folder (multi-file ROMs) is always unpacked, since the zip it arrives in is just
+transport packaging.
 
 ### Language
 

@@ -109,8 +109,8 @@ func (s *GeneralSettingsScreen) buildMenuItems(config *internal.Config) []gaba.I
 		{
 			Item: gaba.MenuItem{Text: i18n.Localize(&goi18n.Message{ID: "settings_compressed_downloads", Other: "Archived Downloads"}, nil)},
 			Options: []gaba.Option{
-				{DisplayName: i18n.Localize(&goi18n.Message{ID: "settings_compressed_downloads_uncompress", Other: "Uncompress"}, nil), Value: true},
-				{DisplayName: i18n.Localize(&goi18n.Message{ID: "settings_compressed_downloads_do_nothing", Other: "Do Nothing"}, nil), Value: false},
+				{DisplayName: i18n.Localize(&goi18n.Message{ID: "settings_compressed_downloads_prefer_extracted", Other: "Prefer extracted"}, nil), Value: true},
+				{DisplayName: i18n.Localize(&goi18n.Message{ID: "settings_compressed_downloads_prefer_compressed", Other: "Prefer compressed"}, nil), Value: false},
 			},
 			SelectedOption: boolToIndex(!config.UnzipDownloads),
 		},

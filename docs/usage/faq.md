@@ -71,8 +71,11 @@ Can't find what you're looking for? [Open an issue](https://github.com/rommapp/g
 > [!NOTE]
 > **What does the "Archived Downloads" setting do?**
 >
-> When set to **Uncompress**, Grout will automatically extract downloaded `.zip` and `.7z` archives after downloading.
-> When set to **Do Nothing**, the archive is saved as-is.
+> It expresses a preference, not a strict rule. **Prefer extracted** extracts downloaded `.zip` and
+> `.7z` archives; **Prefer compressed** keeps them.
+> Two cases always override the preference: DOS and arcade games keep their archive either way
+> (their emulators play the archive directly, so extracting would break them), and multi-file ROMs
+> are always unpacked (the zip is only how the server ships a folder).
 
 > [!NOTE]
 > **What's the difference between the downloaded game indicators?**
