@@ -5,6 +5,7 @@ import (
 	"grout/internal/artutil"
 	"grout/internal/fileutil"
 	"net/url"
+	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -299,7 +300,14 @@ func (r *Rom) IsDownloaded(resolver PlatformDirResolver) bool {
 	// For multi-disk games, check the m3u file
 	if r.HasMultipleFiles {
 		m3uPath := filepath.Join(romDirectory, r.FsNameNoExt+".m3u")
-		return fileutil.FileExists(m3uPath)
+		if fileutil.FileExists(m3uPath) {
+			return true
+		}
+	}
+
+	gameDirectory := filepath.Join(romDirectory, r.FsNameNoExt)
+	if info, err := os.Stat(gameDirectory); err == nil && info.IsDir() {
+		return true
 	}
 
 	// Check if any of the associated files exist

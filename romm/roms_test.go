@@ -1,6 +1,18 @@
 package romm
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+type testPlatformDirResolver struct {
+	romDirectory string
+}
+
+func (r testPlatformDirResolver) GetPlatformRomDirectory(Platform) string {
+	return r.romDirectory
+}
 
 func TestCanonicalLocalBasename(t *testing.T) {
 	tests := []struct {
@@ -144,5 +156,41 @@ func TestLocalBasenames(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestIsDownloadedRecognizesExtractedGameDirectory(t *testing.T) {
+	romDirectory := t.TempDir()
+	gameDirectory := filepath.Join(romDirectory, "Beneath a Steel Sky")
+	if err := os.MkdirAll(gameDirectory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(gameDirectory, "sky.scummvm"), []byte("sky"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	rom := Rom{
+		PlatformFSSlug: "scummvm",
+		FsNameNoExt:    "Beneath a Steel Sky",
+		Files:          []RomFile{{FileName: "Beneath a Steel Sky.zip"}},
+	}
+	if !rom.IsDownloaded(testPlatformDirResolver{romDirectory: romDirectory}) {
+		t.Fatal("extracted game directory was not recognized as downloaded")
+	}
+}
+
+func TestIsDownloadedRecognizesExtractedMultiFileGameDirectory(t *testing.T) {
+	romDirectory := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(romDirectory, "The Secret of Monkey Island"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	rom := Rom{
+		PlatformFSSlug:   "scummvm",
+		FsNameNoExt:      "The Secret of Monkey Island",
+		HasMultipleFiles: true,
+	}
+	if !rom.IsDownloaded(testPlatformDirResolver{romDirectory: romDirectory}) {
+		t.Fatal("extracted multi-file game directory was not recognized as downloaded")
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"grout/internal"
+	"grout/internal/fileutil"
 	"grout/romm"
 )
 
@@ -111,6 +112,27 @@ func TestShouldExtractSingleFileDownload(t *testing.T) {
 			if got := shouldExtractSingleFileDownload(c.unzipDownloads, c.fsSlug); got != c.want {
 				t.Errorf("shouldExtractSingleFileDownload(%v, %q) = %v, want %v",
 					c.unzipDownloads, c.fsSlug, got, c.want)
+			}
+		})
+	}
+}
+
+func TestRouteSingleFileExtraction(t *testing.T) {
+	cases := []struct {
+		name       string
+		shape      fileutil.ArchiveShape
+		wantFolder bool
+	}{
+		{"single flat file extracts as file", fileutil.ArchiveShape{UsableFiles: 1}, false},
+		{"single file in folder extracts as file", fileutil.ArchiveShape{UsableFiles: 1, SingleRoot: "Game", HasStructure: true}, false},
+		{"multi file extracts to folder", fileutil.ArchiveShape{UsableFiles: 3, SingleRoot: "Game", HasStructure: true}, true},
+		{"multi root extracts to folder", fileutil.ArchiveShape{UsableFiles: 2, HasStructure: true}, true},
+		{"two flat files extract to folder", fileutil.ArchiveShape{UsableFiles: 2}, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := singleFileExtractsToFolder(c.shape); got != c.wantFolder {
+				t.Errorf("singleFileExtractsToFolder(%+v) = %v, want %v", c.shape, got, c.wantFolder)
 			}
 		})
 	}

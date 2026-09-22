@@ -71,6 +71,14 @@ func shouldExtractSingleFileDownload(unzipDownloads bool, fsSlug string) bool {
 	return !fileutil.UsesArchiveAsRom(fsSlug)
 }
 
+// singleFileExtractsToFolder reports whether an archive's content is
+// folder-shaped (multiple files or internal structure) and therefore
+// needs a per-game folder, versus a single file that can land directly
+// in the system ROM directory where frontends expect ROM files.
+func singleFileExtractsToFolder(shape fileutil.ArchiveShape) bool {
+	return shape.UsableFiles > 1 || (shape.UsableFiles == 1 && shape.HasStructure && shape.SingleRoot == "")
+}
+
 func NewDownloadScreen() *DownloadScreen {
 	return &DownloadScreen{}
 }
@@ -275,58 +283,41 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 					romDirectory := input.Config.GetPlatformRomDirectory(gamePlatform)
 					archivePath := filepath.Join(romDirectory, g.Files[0].FileName)
 
+					shape, shapeErr := fileutil.AnalyzeArchive(archivePath)
+					if shapeErr != nil {
+						logger.Warn("Failed to analyze archive, keeping file", "game", g.Name, "error", shapeErr)
+						continue
+					}
+
 					progress := &atomic.Float64{}
 					_, err := gaba.ProcessMessage(
 						i18n.Localize(&goi18n.Message{ID: "download_extracting", Other: "Extracting {{.Name}}..."}, map[string]interface{}{"Name": g.Name}),
-						gaba.ProcessMessageOptions{
-							ShowThemeBackground: true,
-							ShowProgressBar:     true,
-							Progress:            progress,
-						},
+						gaba.ProcessMessageOptions{ShowThemeBackground: true, ShowProgressBar: true, Progress: progress},
 						func() (interface{}, error) {
-							logger.Debug("Extracting single-file ROM", "game", g.Name, "file", archivePath)
-
-							var archiveFiles []string
+							var gamePath string
 							var extractErr error
-							if ext == ".7z" {
-								archiveFiles, extractErr = fileutil.SevenZipFileNames(archivePath)
+							if singleFileExtractsToFolder(shape) {
+								extractDir := filepath.Join(romDirectory, g.FsNameNoExt)
+								_, extractErr = fileutil.ExtractArchiveToFolder(archivePath, shape, extractDir, progress)
 								if extractErr == nil {
-									extractErr = fileutil.Un7zip(archivePath, romDirectory, progress)
+									gamePath = resolveExtractedGamePath(romDirectory, extractDir, g.FsNameNoExt)
 								}
 							} else {
-								archiveFiles, extractErr = fileutil.ZipFileNames(archivePath)
-								if extractErr == nil {
-									extractErr = fileutil.Unzip(archivePath, romDirectory, progress)
-								}
+								gamePath, extractErr = fileutil.ExtractArchiveFlat(archivePath, shape, romDirectory, progress)
 							}
-
 							if extractErr != nil {
 								logger.Error("Failed to extract single-file ROM", "game", g.Name, "error", extractErr)
 								return nil, extractErr
 							}
-
 							if err := os.Remove(archivePath); err != nil {
 								logger.Warn("Failed to remove archive file after extraction", "path", archivePath, "error", err)
 							}
-
-							if len(archiveFiles) > 0 {
-								gamePath := archiveFiles[0]
-								if len(archiveFiles) > 1 {
-									for _, f := range archiveFiles {
-										if strings.ToLower(filepath.Ext(f)) == ".m3u" {
-											gamePath = f
-											break
-										}
-									}
-								}
-								for i, entry := range gamelistEntries {
-									if entry.Game.ID == g.ID {
-										gamelistEntries[i].GamePath = filepath.Join(romDirectory, gamePath)
-										break
-									}
+							for i, entry := range gamelistEntries {
+								if entry.Game.ID == g.ID {
+									gamelistEntries[i].GamePath = gamePath
+									break
 								}
 							}
-
 							return nil, nil
 						},
 					)
