@@ -82,7 +82,7 @@ This table shows the mappings of RomM Fs Slug to ROCKNIX's platform folders.
 | Virtual Boy                   | virtualboy                 | virtualboy                  |
 | Wii                           | wii                        | wii, wiiware                |
 | Wii U                         | wiiu                       | wiiu                        |
-| Windows                       | windows                    | windows                     |
+| Windows                       | win                        | windows                     |
 | WonderSwan                    | wonderswan                 | wonderswan                  |
 | WonderSwan Color              | wonderswan-color           | wonderswancolor             |
 | ZX Spectrum                   | zxs                        | zxspectrum                  |
