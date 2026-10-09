@@ -55,8 +55,10 @@ var esdeToRomM = map[string][]string{
 	"x68000":         {"sharp-x68000"},
 	"zxspectrum":     {"zxs"},
 	// PC / Windows
-	"pc":             {"windows"},
-	"pcwindows":      {"windows"},
+	"pc":        {"win"},
+	"pcwindows": {"win"},
+	"windows3x": {"win3x"},
+	"windows9x": {"win9x"},
 	// Misc handhelds
 	"megaduck":       {"mega-duck-slash-cougar-boy"},
 	"pico8":          {"pico-8"},
@@ -118,10 +120,23 @@ func GeneratePlatforms(baseXML, overlayXML []byte) (map[string][]string, error) 
 		}
 		// Split comma-separated ES-DE platform fields, normalize each part to
 		// its canonical RomM slug(s), and accumulate folder paths per slug.
-		for _, esPlatform := range splitPlatforms(entry.Platform) {
+		platform := entry.Platform
+		// ES-DE uses the generic Windows scraping platform for Windows 9x.
+		if entry.Name == "windows9x" {
+			platform = "windows9x"
+		}
+		for _, esPlatform := range splitPlatforms(platform) {
 			for _, rommSlug := range toRomMSlugs(esPlatform) {
 				result[rommSlug] = appendUnique(result[rommSlug], rel)
 			}
+		}
+	}
+	// The dedicated Windows folder must precede generic PC/port alternatives.
+	for i, folder := range result["win"] {
+		if folder == "windows" {
+			copy(result["win"][1:i+1], result["win"][:i])
+			result["win"][0] = folder
+			break
 		}
 	}
 	return result, nil

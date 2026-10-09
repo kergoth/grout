@@ -431,7 +431,8 @@
   "wiiu": [
     "wiiu/roms"
   ],
-  "windows": [
+  "win": [
+    "windows",
     "pc",
     "ags",
     "desktop",
@@ -441,12 +442,13 @@
     "kodi",
     "lutris",
     "ports",
-    "quake",
-    "windows",
-    "windows9x"
+    "quake"
   ],
-  "windows3x": [
+  "win3x": [
     "windows3x"
+  ],
+  "win9x": [
+    "windows9x"
   ],
   "wonderswan": [
     "wonderswan"
