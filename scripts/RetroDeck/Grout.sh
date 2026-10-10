@@ -17,7 +17,6 @@ chmod +x ./grout
 
 if [ -f "$FLAG_FILE" ]; then
     rm -f "$FLAG_FILE"
-    pkill -f es-de
 fi
 
 exit 0
