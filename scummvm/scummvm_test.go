@@ -62,3 +62,33 @@ func TestFindStub_MissingDirectory(t *testing.T) {
 		t.Error("expected an error for a folder that does not exist")
 	}
 }
+
+func TestReadID(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    string
+		ok      bool
+	}{
+		{"plain id", "sky", "sky", true},
+		{"whitespace trimmed", "  sky\n", "sky", true},
+		{"engine and game", "scumm:tentacle", "scumm:tentacle", true},
+		{"empty", "", "", false},
+		{"only whitespace", " \n", "", false},
+		{"a path is not an id", "../../etc/passwd", "", false},
+		{"dot", ".", "", false},
+		{"two lines", "sky\nextra", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := write(t, t.TempDir(), "x.scummvm", tt.content)
+			got, ok, err := ReadID(path)
+			if err != nil {
+				t.Fatalf("ReadID: %v", err)
+			}
+			if got != tt.want || ok != tt.ok {
+				t.Errorf("ReadID(%q) = %q, %v; want %q, %v", tt.content, got, ok, tt.want, tt.ok)
+			}
+		})
+	}
+}

@@ -6,11 +6,13 @@ package scummvm
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 )
 
-const stubExt = ".scummvm"
+// StubExt is the extension of a launcher stub.
+const StubExt = ".scummvm"
 
 // FindStub locates the launcher stub inside an extracted game folder.
 //
@@ -31,7 +33,7 @@ func FindStub(dir string) (path string, ok bool, err error) {
 		if d.IsDir() {
 			return nil
 		}
-		if strings.HasPrefix(d.Name(), ".") || !strings.EqualFold(filepath.Ext(d.Name()), stubExt) {
+		if strings.HasPrefix(d.Name(), ".") || !strings.EqualFold(filepath.Ext(d.Name()), StubExt) {
 			return nil
 		}
 
@@ -57,4 +59,19 @@ func FindStub(dir string) (path string, ok bool, err error) {
 		return "", false, nil
 	}
 	return found[0], true, nil
+}
+
+// ReadID returns the game ID held in a stub. ok is false for an empty stub or
+// content that could not be an ID, such as a path.
+func ReadID(stubPath string) (id string, ok bool, err error) {
+	contents, err := os.ReadFile(stubPath)
+	if err != nil {
+		return "", false, fmt.Errorf("reading ScummVM stub: %w", err)
+	}
+
+	id = strings.TrimSpace(string(contents))
+	if id == "" || id == "." || strings.ContainsAny(id, "/\\\r\n") {
+		return "", false, nil
+	}
+	return id, true, nil
 }
