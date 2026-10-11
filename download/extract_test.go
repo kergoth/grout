@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/atomic"
 
+	"grout/archive"
 	"grout/cfw"
 	"grout/gamelist"
 	"grout/library"
@@ -63,7 +64,11 @@ func TestExtractArchive(t *testing.T) {
 	archivePath := filepath.Join(dir, "Game.zip")
 	zipOf(t, archivePath, "Game.sfc")
 
-	path, err := ExtractArchive(archivePath, dir, &atomic.Float64{})
+	shape, err := archive.Analyze(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path, err := ExtractArchive(archivePath, dir, shape, &atomic.Float64{})
 	if err != nil {
 		t.Fatalf("ExtractArchive: %v", err)
 	}
@@ -80,20 +85,116 @@ func TestExtractArchive(t *testing.T) {
 	}
 }
 
+// A single rom nested in a folder inside the archive still lands among the
+// other roms, where frontends look for it.
+func TestExtractArchive_StripsTheFolderAroundASingleRom(t *testing.T) {
+	dir := t.TempDir()
+	archivePath := filepath.Join(dir, "Game.zip")
+	zipOf(t, archivePath, "Game/Game.sfc")
+
+	shape, err := archive.Analyze(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path, err := ExtractArchive(archivePath, dir, shape, &atomic.Float64{})
+	if err != nil {
+		t.Fatalf("ExtractArchive: %v", err)
+	}
+	if want := filepath.Join(dir, "Game.sfc"); path != want {
+		t.Errorf("path = %q, want %q", path, want)
+	}
+}
+
 // Several discs need the playlist that ties them together, not whichever file
-// happens to come first in the archive.
-func TestExtractArchive_PrefersThePlaylist(t *testing.T) {
+// happens to come first in the archive, and a folder of their own.
+func TestExtractToFolder_PrefersThePlaylist(t *testing.T) {
+	t.Setenv(cfw.EnvVar, string(cfw.MuOS))
+
 	dir := t.TempDir()
 	archivePath := filepath.Join(dir, "FF7.zip")
 	zipOf(t, archivePath, "FF7 (Disc 1).chd", "FF7 (Disc 2).chd", "FF7.m3u")
 
-	path, err := ExtractArchive(archivePath, dir, &atomic.Float64{})
+	shape, err := archive.Analyze(archivePath)
 	if err != nil {
-		t.Fatalf("ExtractArchive: %v", err)
+		t.Fatal(err)
+	}
+	path, err := ExtractToFolder(archivePath, dir, "FF7", shape, &atomic.Float64{})
+	if err != nil {
+		t.Fatalf("ExtractToFolder: %v", err)
 	}
 
 	if filepath.Base(path) != "FF7.m3u" {
 		t.Errorf("path = %q, want the playlist", path)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Errorf("the path handed to the frontend does not exist: %v", err)
+	}
+	if _, err := os.Stat(archivePath); !os.IsNotExist(err) {
+		t.Error("the archive must be removed once it is unpacked")
+	}
+}
+
+// A game folder inside the archive must not end up nested twice.
+func TestExtractToFolder_StripsTheRedundantTopLevelFolder(t *testing.T) {
+	t.Setenv(cfw.EnvVar, string(cfw.Knulli))
+
+	dir := t.TempDir()
+	archivePath := filepath.Join(dir, "Monkey Island.zip")
+	zipOf(t, archivePath, "Monkey Island/monkey.000", "Monkey Island/monkey.001")
+
+	shape, err := archive.Analyze(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ExtractToFolder(archivePath, dir, "Monkey Island", shape, &atomic.Float64{}); err != nil {
+		t.Fatalf("ExtractToFolder: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, "Monkey Island", "monkey.000")); err != nil {
+		t.Errorf("game files should sit directly in the game folder: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "Monkey Island", "Monkey Island")); err == nil {
+		t.Error("the game folder was nested inside itself")
+	}
+}
+
+func TestArchiveTreatment(t *testing.T) {
+	single := archive.Shape{UsableFiles: 1}
+	nestedSingle := archive.Shape{UsableFiles: 1, HasStructure: true, SingleRoot: "Game"}
+	multi := archive.Shape{UsableFiles: 3, HasStructure: true, SingleRoot: "Game"}
+
+	tests := []struct {
+		name      string
+		slug      string
+		file      string
+		shape     archive.Shape
+		preferred bool
+		want      Treatment
+	}{
+		{"lone rom, extraction preferred", "snes", "Game.zip", single, true, ExtractToRomDirectory},
+		{"lone rom, archive preferred", "snes", "Game.zip", single, false, KeepArchive},
+		{"lone rom inside a folder is still a lone rom", "snes", "Game.zip", nestedSingle, true, ExtractToRomDirectory},
+		{"several files extract whatever the preference", "scummvm", "Game.zip", multi, false, ExtractToGameFolder},
+		{"several files extract when preferred too", "scummvm", "Game.zip", multi, true, ExtractToGameFolder},
+		{"archive-as-rom platform keeps a lone rom", "arcade", "Game.zip", single, true, KeepArchive},
+		{"archive-as-rom platform keeps several files", "mame", "Game.zip", multi, true, KeepArchive},
+		{"slug case does not matter", "DOS", "Game.zip", multi, true, KeepArchive},
+		{"lone rom in a 7z extracts whatever the preference", "snes", "Game.7z", single, false, ExtractToRomDirectory},
+		{"7z on an archive-as-rom platform is kept", "arcade", "Game.7z", single, false, KeepArchive},
+		{"newer archive-as-rom slugs are kept", "g-and-w", "Game.zip", single, true, KeepArchive},
+		{"alternate spelling of an archive-as-rom slug", "ms-dos", "Game.zip", multi, true, KeepArchive},
+		{"neo-geo-pocket is not neo-geo", "neo-geo-pocket", "Game.zip", single, true, ExtractToRomDirectory},
+		{"console that never reads zips extracts a lone rom", "psx", "Game.zip", single, false, ExtractToRomDirectory},
+		{"alternate spelling of such a console", "Sony-PlayStation", "Game.zip", single, false, ExtractToRomDirectory},
+		{"always-extract does not override archive-as-rom", "dos", "Game.zip", single, false, KeepArchive},
+		{"an empty archive is left alone", "snes", "Game.zip", archive.Shape{}, true, KeepArchive},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ArchiveTreatment(tt.slug, tt.file, tt.shape, tt.preferred); got != tt.want {
+				t.Errorf("ArchiveTreatment(%q, %+v, %v) = %v, want %v", tt.slug, tt.shape, tt.preferred, got, tt.want)
+			}
+		})
 	}
 }
 
@@ -106,7 +207,7 @@ func TestExtractArchive_KeepsTheArchiveOnFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := ExtractArchive(archivePath, dir, &atomic.Float64{}); err == nil {
+	if _, err := ExtractArchive(archivePath, dir, archive.Shape{UsableFiles: 1}, &atomic.Float64{}); err == nil {
 		t.Fatal("expected an error unpacking a file that is not an archive")
 	}
 	if _, err := os.Stat(archivePath); err != nil {
