@@ -5,6 +5,7 @@ import (
 	"grout/cfw/anbernic"
 	"grout/cfw/arkos"
 	"grout/cfw/batocera"
+	"grout/cfw/emudeck"
 	"grout/cfw/esde"
 	"grout/cfw/knulli"
 	"grout/cfw/koriki"
@@ -493,7 +494,7 @@ var firmwares = map[CFW]*Firmware{
 		romDirectory:          retrodeck.GetRomDirectory,
 		biosDirectory:         retrodeck.GetBIOSDirectory,
 		baseSavePath:          retrodeck.GetBaseSavePath,
-		mediaDirectory:        esdeMedia(retrodeck.GetMediaDirectory),
+		mediaDirectory:        esdeMedia(retrodeck.GetMediaDirectory, filepath.Base),
 		sidecarDirectories:    bezelsOnly(retrodeck.GetBezelDirectory),
 		platforms:             esde.Platforms,
 		saveDirectories:       esde.Platforms,
@@ -502,6 +503,25 @@ var firmwares = map[CFW]*Firmware{
 		emulationStationBased: true,
 		logPath:               retrodeck.GetLogPath,
 		packaging:             Packaging{Asset: "Grout-RetroDECK.zip", LaunchScript: "Grout.sh", InstallDepth: 2},
+	},
+	// EmuDeck runs ES-DE too, but is started from ES-DE's ports list rather
+	// than Steam, so it gets a launcher shortcut; its install may be on the SD
+	// card, which is why every location is read from its settings.
+	EmuDeck: {
+		id:                    EmuDeck,
+		romDirectory:          emudeck.GetRomDirectory,
+		biosDirectory:         emudeck.GetBIOSDirectory,
+		baseSavePath:          emudeck.GetBaseSavePath,
+		mediaDirectory:        esdeMedia(emudeck.GetMediaDirectory, emudeck.System),
+		sidecarDirectories:    bezelsOnly(emudeck.GetBezelDirectory),
+		groutGamelist:         emudeck.GetGroutGamelist,
+		groutLauncherPath:     "./Grout.sh",
+		platforms:             emudeck.Platforms,
+		saveDirectories:       emudeck.Platforms,
+		gamelist:              GamelistEmulationStation,
+		gamelistPath:          emudeck.GetGamelistPath,
+		emulationStationBased: true,
+		packaging:             Packaging{Asset: "Grout-EmuDeck.zip", LaunchScript: "Grout.sh", InstallDepth: 2},
 	},
 }
 

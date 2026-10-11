@@ -16,13 +16,14 @@ var esdeFolder = map[ArtSlot]string{
 
 // esdeMedia builds the media directory resolver for a firmware running ES-DE.
 // ES-DE finds media by folder and file name alone, so every kind gets its own
-// folder and a file takes the rom's name with no suffix.
-func esdeMedia(root func() string) func(slot ArtSlot, romDir string) string {
+// folder and a file takes the rom's name with no suffix. system names the ES-DE
+// system a rom directory belongs to.
+func esdeMedia(root func() string, system func(romDir string) string) func(slot ArtSlot, romDir string) string {
 	return func(slot ArtSlot, romDir string) string {
 		folder, ok := esdeFolder[slot]
 		if !ok {
 			return ""
 		}
-		return filepath.Join(root(), filepath.Base(romDir), folder)
+		return filepath.Join(root(), system(romDir), folder)
 	}
 }
