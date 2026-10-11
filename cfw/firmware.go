@@ -275,6 +275,7 @@ var firmwares = map[CFW]*Firmware{
 		id:                MuOS,
 		romDirectory:      muos.GetRomDirectory,
 		organizeExtracted: muos.OrganizeMultiFileRom,
+		scummvmLauncher:   muos.ScummVMLauncher,
 		biosDirectory:     muos.GetBIOSDirectory,
 		baseSavePath:      muos.GetBaseSavePath,
 		coverDirectory:    inCatalogue(muos.GetArtDirectory),
