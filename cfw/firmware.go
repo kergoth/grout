@@ -5,6 +5,7 @@ import (
 	"grout/cfw/anbernic"
 	"grout/cfw/arkos"
 	"grout/cfw/batocera"
+	"grout/cfw/esde"
 	"grout/cfw/knulli"
 	"grout/cfw/koriki"
 	"grout/cfw/minui"
@@ -494,8 +495,8 @@ var firmwares = map[CFW]*Firmware{
 		baseSavePath:          retrodeck.GetBaseSavePath,
 		mediaDirectory:        esdeMedia(retrodeck.GetMediaDirectory),
 		sidecarDirectories:    bezelsOnly(retrodeck.GetBezelDirectory),
-		platforms:             retrodeck.Platforms,
-		saveDirectories:       retrodeck.Platforms,
+		platforms:             esde.Platforms,
+		saveDirectories:       esde.Platforms,
 		gamelist:              GamelistEmulationStation,
 		gamelistPath:          retrodeck.GetGamelistPath,
 		emulationStationBased: true,
