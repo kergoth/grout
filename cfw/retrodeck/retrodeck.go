@@ -75,23 +75,17 @@ func GetBaseSavePath() string {
 	return filepath.Join(GetBasePath(), "saves")
 }
 
-func GetArtDirectory(romDir string) string {
-	if paths := GetConfigPaths(); paths != nil {
+// GetMediaDirectory is the root ES-DE reads downloaded media from, with a
+// folder per system beneath it.
+func GetMediaDirectory() string {
+	if paths := GetConfigPaths(); paths != nil && paths.DownloadedMediaPath != "" {
 		return paths.DownloadedMediaPath
 	}
-	return filepath.Join(romDir, "images")
-}
-
-func GetVideoDirectory(romDir string) string {
-	return filepath.Join(romDir, "videos")
+	return filepath.Join(GetBasePath(), "ES-DE", "downloaded_media")
 }
 
 func GetBezelDirectory(romDir string) string {
 	return filepath.Join(romDir, "bezels")
-}
-
-func GetManualDirectory(romDir string) string {
-	return filepath.Join(romDir, "manuals")
 }
 
 func GetGamelistDirectory() string {

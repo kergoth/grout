@@ -13,6 +13,14 @@ var allFirmwares = All
 
 var esFirmwares = []CFW{Knulli, ROCKNIX, ArkOS, Batocera, RetroDECK}
 
+// esdeFirmwares keep a folder per kind of media instead of sharing one with
+// filename suffixes.
+var esdeFirmwares = []CFW{RetroDECK}
+
+func isESDE(c CFW) bool {
+	return slices.Contains(esdeFirmwares, c)
+}
+
 func isES(c CFW) bool {
 	return slices.Contains(esFirmwares, c)
 }
@@ -48,6 +56,12 @@ func TestArtDirectory_SuffixedSlotsShareTheCoverDirectory(t *testing.T) {
 		cover := artDir(c, ArtCover)
 		for _, slot := range suffixed {
 			got := artDir(c, slot)
+			if isESDE(c) {
+				if got == cover {
+					t.Errorf("%s %s shares the cover directory %q", c, slot, got)
+				}
+				continue
+			}
 			if isES(c) {
 				if got != cover {
 					t.Errorf("%s %s = %q, want the cover directory %q", c, slot, got, cover)
@@ -78,6 +92,9 @@ func TestArtDirectory_SidecarSlotsAreESOnly(t *testing.T) {
 				continue
 			}
 			want := filepath.Join(testRomDir, dirName)
+			if isESDE(c) && slot != ArtBezel {
+				continue
+			}
 			if got != want {
 				t.Errorf("%s %s = %q, want %q", c, slot, got, want)
 			}
@@ -96,6 +113,39 @@ func TestArtDirectory_SidecarSlotsDoNotCollide(t *testing.T) {
 				t.Errorf("%s: slots %s and %s share directory %q", c, other, slot, dir)
 			}
 			seen[dir] = slot
+		}
+	}
+}
+
+// ES-DE reads media from <root>/<system>/<folder>, one folder per kind.
+func TestArtDirectory_ESDEFoldersPerKind(t *testing.T) {
+	t.Setenv("BASE_PATH", "/base")
+	want := map[ArtSlot]string{
+		ArtCover:   "covers",
+		ArtMarquee: "marquees",
+		ArtBoxback: "backcovers",
+		ArtFanart:  "fanart",
+		ArtVideo:   "videos",
+		ArtManual:  "manuals",
+	}
+
+	for _, c := range esdeFirmwares {
+		seen := map[string]ArtSlot{}
+		for slot, folder := range want {
+			got := artDir(c, slot)
+			if base := filepath.Base(got); base != folder {
+				t.Errorf("%s %s = %q, want a %q folder", c, slot, got, folder)
+			}
+			if system := filepath.Base(filepath.Dir(got)); system != "gba" {
+				t.Errorf("%s %s = %q, want it under the system folder gba", c, slot, got)
+			}
+			if other, clash := seen[got]; clash {
+				t.Errorf("%s: slots %s and %s share %q", c, other, slot, got)
+			}
+			seen[got] = slot
+		}
+		if got := artDir(c, ArtBezel); got != filepath.Join(testRomDir, "bezels") {
+			t.Errorf("%s bezel = %q, want it beside the roms", c, got)
 		}
 	}
 }
@@ -155,6 +205,9 @@ func TestArtDirectory_UnknownInputsReturnEmpty(t *testing.T) {
 func TestArtDirectory_EachFirmwareAnswersForItself(t *testing.T) {
 	for _, slot := range []ArtSlot{ArtCover, ArtMarquee, ArtBoxback, ArtFanart, ArtVideo, ArtManual, ArtBezel} {
 		for _, c := range esFirmwares {
+			if isESDE(c) && slot != ArtBezel {
+				continue
+			}
 			if got := artDir(c, slot); !strings.HasPrefix(got, testRomDir) {
 				t.Errorf("%s %s = %q, want a path under %q", c, slot, got, testRomDir)
 			}

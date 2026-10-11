@@ -40,6 +40,10 @@ func TestArtFileName(t *testing.T) {
 		{"arkos behaves like knulli", ArkOS, ArtThumbnail, gbaFileName, gbaBaseName, "Sonic the Hedgehog-thumb.png"},
 		{"batocera behaves like knulli", Batocera, ArtBoxback, gbaFileName, gbaBaseName, "Sonic the Hedgehog-boxback.png"},
 
+		// ES-DE has a folder per kind, so files need no suffix.
+		{"retrodeck marquee has no suffix", RetroDECK, ArtMarquee, gbaFileName, gbaBaseName, "Sonic the Hedgehog.png"},
+		{"retrodeck fanart has no suffix", RetroDECK, ArtFanart, gbaFileName, gbaBaseName, "Sonic the Hedgehog.png"},
+
 		// Everything else drops the extension and takes no suffix.
 		{"spruce cover", Spruce, ArtCover, gbaFileName, gbaBaseName, "Sonic the Hedgehog.png"},
 		{"spruce thumbnail takes no suffix", Spruce, ArtThumbnail, gbaFileName, gbaBaseName, "Sonic the Hedgehog.png"},

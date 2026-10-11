@@ -45,7 +45,7 @@ func (s ArtSlot) String() string {
 }
 
 // esSuffix distinguishes slots on EmulationStation firmwares, which keep every
-// art kind in one directory. Slots absent from the map share the cover's name.
+// art kind in one directory. Firmwares with a folder per kind need none. Slots absent from the map share the cover's name.
 var esSuffix = map[ArtSlot]string{
 	ArtThumbnail: "-thumb",
 	ArtMarquee:   "-marquee",
@@ -69,7 +69,7 @@ func ArtFileName(c CFW, slot ArtSlot, romFileName, baseName string) string {
 		stem = romFileName
 	}
 
-	if c.IsBasedOnEmulationStation() {
+	if c.IsBasedOnEmulationStation() && !Lookup(c).UsesMediaFolders() {
 		return stem + esSuffix[slot] + ".png"
 	}
 	return stem + ".png"
