@@ -2,6 +2,7 @@ package knulli
 
 import (
 	"embed"
+	"grout/scummvm"
 	"grout/tables"
 	"os"
 	"path/filepath"
@@ -52,4 +53,11 @@ func GetManualDirectory(romDir string) string {
 
 func GetBezelDirectory(romDir string) string {
 	return filepath.Join(romDir, "bezels")
+}
+
+// ScummVMLauncher finds the stub Knulli launches a ScummVM game from. Knulli
+// takes any ".scummvm" file in the game folder, whatever it is called, so
+// nothing is renamed or moved.
+func ScummVMLauncher(gameDir, _ string) (string, bool, error) {
+	return scummvm.FindStub(gameDir)
 }
