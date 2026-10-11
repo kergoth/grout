@@ -115,6 +115,10 @@ type Firmware struct {
 	// extracted ScummVM game folder. ok is false when it cannot, and the folder
 	// is then left as the generic path handling found it.
 	scummvmLauncher func(gameDir, romDir string) (path string, ok bool, err error)
+	// scummvmFolderAsFile means ScummVM games are folders named "<name>.scummvm"
+	// that the frontend treats as one file, and so name their media after the
+	// folder including that extension.
+	scummvmFolderAsFile bool
 	// keepsRomExtInSaves names saves after the whole rom file rather than
 	// stripping the extension as RetroArch does. Fallback only, when the
 	// convention cannot be read off saves already on the device (issue #245).
@@ -511,6 +515,7 @@ var firmwares = map[CFW]*Firmware{
 		baseSavePath:          retrodeck.GetBaseSavePath,
 		mediaDirectory:        esdeMedia(retrodeck.GetMediaDirectory, filepath.Base),
 		scummvmLauncher:       esde.ScummVMLauncher,
+		scummvmFolderAsFile:   true,
 		sidecarDirectories:    bezelsOnly(retrodeck.GetBezelDirectory),
 		platforms:             esde.Platforms,
 		saveDirectories:       esde.Platforms,
@@ -530,6 +535,7 @@ var firmwares = map[CFW]*Firmware{
 		baseSavePath:          emudeck.GetBaseSavePath,
 		mediaDirectory:        esdeMedia(emudeck.GetMediaDirectory, emudeck.System),
 		scummvmLauncher:       esde.ScummVMLauncher,
+		scummvmFolderAsFile:   true,
 		sidecarDirectories:    bezelsOnly(emudeck.GetBezelDirectory),
 		groutGamelist:         emudeck.GetGroutGamelist,
 		groutLauncherPath:     "./Grout.sh",

@@ -1,5 +1,11 @@
 package cfw
 
+import (
+	"strings"
+
+	"grout/scummvm"
+)
+
 // ArtSlot is where a piece of artwork is stored on device.
 //
 // Distinct from library.ArtKind, which names the image RomM serves. Several
@@ -73,4 +79,15 @@ func ArtFileName(c CFW, slot ArtSlot, romFileName, baseName string) string {
 		return stem + esSuffix[slot] + ".png"
 	}
 	return stem + ".png"
+}
+
+// MediaStem is the name media files for a game start with, before any suffix or
+// extension. It is the rom's base name, except where the frontend treats a
+// ScummVM game folder as a file: the folder's name then carries ".scummvm", and
+// ES-DE looks for media under that whole name.
+func MediaStem(c CFW, fsSlug, baseName string) string {
+	if strings.EqualFold(fsSlug, "scummvm") && Lookup(c).scummvmFolderAsFile {
+		return baseName + scummvm.StubExt
+	}
+	return baseName
 }

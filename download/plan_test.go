@@ -2,6 +2,7 @@ package download
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -187,6 +188,29 @@ func TestBuildPlan_CoverArtIsPlannedAndRecorded(t *testing.T) {
 	if plan.Entries[0].Game.Art.Cover != plan.Art[0].Location {
 		t.Errorf("entry records %q but art is written to %q",
 			plan.Entries[0].Game.Art.Cover, plan.Art[0].Location)
+	}
+}
+
+// ES-DE looks for a ScummVM game folder's media under the folder's whole name.
+func TestBuildPlan_ScummVMMediaIsNamedAfterTheFolder(t *testing.T) {
+	t.Setenv("CFW", "RETRODECK")
+	t.Setenv("RETRODECK_CFG", "")
+
+	games := []romm.Rom{{
+		ID: 7, Name: "Sky", FsName: "Sky.7z", FsNameNoExt: "Sky",
+		PathCoverLarge: "/covers/sky.png",
+		Files:          []romm.RomFile{{ID: 1, FileName: "Sky.7z"}},
+	}}
+	platform := romm.Platform{ID: 3, FSSlug: "scummvm", Name: "ScummVM"}
+
+	config := settings.Config{DownloadArt: true, ArtKind: library.ArtKindDefault}
+	plan, _ := BuildPlan(config, testHost(), platform, games, 0)
+
+	if len(plan.Art) == 0 {
+		t.Fatal("expected cover art to be planned")
+	}
+	if got := filepath.Base(plan.Art[0].Location); got != "Sky.scummvm.png" {
+		t.Errorf("cover file = %q, want Sky.scummvm.png", got)
 	}
 }
 

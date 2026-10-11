@@ -74,3 +74,24 @@ func TestArtFileName_ESSlotsDoNotCollide(t *testing.T) {
 		seen[name] = slot
 	}
 }
+
+// ES-DE reads media for a ScummVM game folder under the folder's whole name,
+// extension included.
+func TestMediaStem(t *testing.T) {
+	tests := []struct {
+		cfw  CFW
+		slug string
+		want string
+	}{
+		{RetroDECK, "scummvm", "Sky.scummvm"},
+		{EmuDeck, "ScummVM", "Sky.scummvm"},
+		{EmuDeck, "gba", "Sky"},
+		{Knulli, "scummvm", "Sky"},
+		{MuOS, "scummvm", "Sky"},
+	}
+	for _, tt := range tests {
+		if got := MediaStem(tt.cfw, tt.slug, "Sky"); got != tt.want {
+			t.Errorf("MediaStem(%s, %q) = %q, want %q", tt.cfw, tt.slug, got, tt.want)
+		}
+	}
+}
