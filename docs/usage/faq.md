@@ -71,10 +71,12 @@ Can't find what you're looking for? [Open an issue](https://github.com/rommapp/g
 > When you download a multi-disc game, Grout automatically extracts and creates an `.m3u` playlist file.
 
 > [!NOTE]
-> **What does the "Archived Downloads" setting do?**
+> **What does the "Single-ROM archives" setting do?**
 >
-> When set to **Uncompress**, Grout will automatically extract downloaded `.zip` and `.7z` archives after downloading.
-> When set to **Do Nothing**, the archive is saved as-is.
+> It only applies to a downloaded `.zip` that holds exactly one ROM (a `.7z`, or a zip for a console whose emulators never read zips, is always extracted). With **Extract**, Grout unpacks it and
+> removes the archive; with **Keep as archive**, the archive is saved as-is. Games made of several files are always
+> extracted into their own folder, and systems that play archives directly (DOS, arcade, and similar) always keep
+> them.
 
 > [!NOTE]
 > **What's the difference between the downloaded game indicators?**

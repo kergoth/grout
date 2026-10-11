@@ -97,12 +97,21 @@ _EmulationStation-based firmwares only._ Whether the name written to the gamelis
 - **Include** - `Super Mario World (USA)`
 - **Omit** - `Super Mario World`
 
-### Archived Downloads
+### Single-ROM archives
 
-Controls what happens when downloading archived ROM files (zip and 7z):
+Controls what happens to a downloaded `.zip` that holds exactly one ROM:
 
-- **Uncompress** - Grout automatically extracts archived ROMs after downloading. The archive is deleted after extraction.
-- **Do Nothing** - Keep the downloaded archive as-is without extracting.
+- **Extract** - Grout extracts the ROM after downloading and deletes the archive.
+- **Keep as archive** - Keep the downloaded archive as-is.
+
+This setting does not apply to everything else, because the content decides:
+
+- A `.7z` is always extracted, because the emulators that read a zip directly do not read 7z. So is a zip on a
+  system whose emulators never read zips (PlayStation, Switch, 3DS, DS, Wii, GameCube, Dreamcast, Saturn and similar).
+- Games made of several files (disc images with a playlist, ScummVM games, and similar) are always extracted into a
+  folder named for the game, since frontends cannot launch them from an archive.
+- Systems that play archives directly, such as DOS, arcade, MAME, FBNeo, Neo Geo, CPS and Atomiswave, always keep
+  the archive.
 
 ### Language
 
