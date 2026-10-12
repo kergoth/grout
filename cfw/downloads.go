@@ -2,6 +2,7 @@ package cfw
 
 import (
 	"grout/files"
+	"os"
 	"path/filepath"
 )
 
@@ -36,9 +37,21 @@ func (l RomLayout) DownloadPath(romDir string) string {
 
 // IsDownloaded reports whether the rom is present under romDir. A multi-disc
 // game needs its playlist; a game with several versions needs any one of them.
+// A game unpacked into a folder of its own has no file under the server's
+// name any more, so a folder with something in it counts.
 func (l RomLayout) IsDownloaded(romDir string) bool {
 	if romDir == "" {
 		return false
+	}
+
+	if entries, err := os.ReadDir(filepath.Join(romDir, l.BaseName)); err == nil && len(entries) > 0 {
+		return true
+	}
+
+	// A ScummVM game on muOS keeps its data in a hidden folder and is
+	// launched from this stub beside it.
+	if files.FileExists(filepath.Join(romDir, l.BaseName+".scummvm")) {
+		return true
 	}
 
 	if l.MultiDisc {

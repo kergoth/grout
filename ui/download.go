@@ -10,6 +10,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 
+	"grout/archive"
 	"grout/cfw"
 	"grout/download"
 	"grout/files"
@@ -185,19 +186,73 @@ func (s *DownloadScreen) unpack(input DownloadInput, plan download.Plan, downloa
 				logger.Error("Failed to unpack multi-file ROM", "game", game.Name, "error", err)
 				continue
 			}
+			path = scummvmEntry(platformOf(input.Platform, game).FSSlug, romDirectory, game.FsNameNoExt, path)
 			plan.SetGamePath(game.EntryFileName(), path)
 
-		case input.Config.UnzipDownloads && download.IsArchive(location):
-			path, err := s.extracting(game.Name, func(progress *atomic.Float64) (string, error) {
-				return download.ExtractArchive(location, filepath.Dir(location), progress)
-			})
-			if err != nil {
-				logger.Warn("Failed to unpack ROM, keeping the archive", "game", game.Name, "error", err)
-				continue
-			}
-			plan.SetGamePath(game.EntryFileName(), path)
+		case download.IsArchive(location):
+			s.unpackArchive(input, game, location, plan)
 		}
 	}
+}
+
+// unpackArchive handles a single-file download that turned out to be a .zip or
+// .7z. What is inside decides the outcome; the Single-ROM archives setting only
+// has a say when a zip holds a lone rom.
+func (s *DownloadScreen) unpackArchive(input DownloadInput, game romm.Rom, location string, plan download.Plan) {
+	logger := gaba.GetLogger()
+	platform := platformOf(input.Platform, game)
+
+	shape, err := archive.Analyze(location)
+	if err != nil {
+		logger.Warn("Cannot read the archive, keeping it", "game", game.Name, "error", err)
+		return
+	}
+
+	romDirectory := filepath.Dir(location)
+	var path string
+
+	switch download.ArchiveTreatment(platform.FSSlug, location, shape, input.Config.UnzipDownloads) {
+	case download.ExtractToRomDirectory:
+		path, err = s.extracting(game.Name, func(progress *atomic.Float64) (string, error) {
+			return download.ExtractArchive(location, romDirectory, shape, progress)
+		})
+	case download.ExtractToGameFolder:
+		baseName := strings.TrimSuffix(filepath.Base(location), filepath.Ext(location))
+		path, err = s.extracting(game.Name, func(progress *atomic.Float64) (string, error) {
+			return download.ExtractToFolder(location, romDirectory, baseName, shape, progress)
+		})
+		if err == nil {
+			path = scummvmEntry(platform.FSSlug, romDirectory, baseName, path)
+		}
+	default:
+		logger.Debug("Keeping the archive", "game", game.Name, "platform", platform.FSSlug)
+		return
+	}
+
+	if err != nil {
+		logger.Warn("Failed to unpack ROM, keeping the archive", "game", game.Name, "error", err)
+		return
+	}
+	plan.SetGamePath(game.EntryFileName(), path)
+}
+
+// scummvmEntry swaps in the launcher stub for an extracted ScummVM game, on
+// firmwares that launch from one. Anything else, including a failed lookup,
+// keeps the path the unpack produced.
+func scummvmEntry(fsSlug, romDirectory, baseName, path string) string {
+	if !strings.EqualFold(fsSlug, "scummvm") {
+		return path
+	}
+
+	stub, ok, err := cfw.ScummVMLauncher(filepath.Join(romDirectory, baseName), romDirectory)
+	if err != nil {
+		gaba.GetLogger().Warn("Cannot look for a ScummVM launcher", "path", path, "error", err)
+		return path
+	}
+	if !ok {
+		return path
+	}
+	return stub
 }
 
 // extracting runs one unpack behind a progress dialog.
