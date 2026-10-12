@@ -111,10 +111,10 @@ func generalSettings(config settings.Config) []settingRow {
 			def: settings.DownloadedGamesModeDoNothing,
 		},
 		{
-			key: "archived_downloads", label: localize("settings_compressed_downloads", "Archived Downloads"),
+			key: "archived_downloads", label: localize("settings_single_rom_archives", "Single-ROM archives"),
 			options: []gaba.Option{
-				{DisplayName: localize("settings_compressed_downloads_uncompress", "Uncompress"), Value: true},
-				{DisplayName: localize("settings_compressed_downloads_do_nothing", "Do Nothing"), Value: false},
+				{DisplayName: localize("settings_single_rom_archives_extract", "Extract"), Value: true},
+				{DisplayName: localize("settings_single_rom_archives_keep", "Keep as archive"), Value: false},
 			},
 			get: func(c settings.Config) any { return c.UnzipDownloads },
 			set: assign(func(c *settings.Config, v bool) { c.UnzipDownloads = v }),

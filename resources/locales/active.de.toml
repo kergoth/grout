@@ -706,18 +706,6 @@ other = "Sammlungsansicht"
 hash = "sha1-2b9dc92af51847dda7770b3092771ac0f411e9b5"
 other = "Sammlungen"
 
-[settings_compressed_downloads]
-hash = "sha1-a43e32473f03f674f028dc2f716cafdd6fd2cced"
-other = "Archivierte Downloads"
-
-[settings_compressed_downloads_do_nothing]
-hash = "sha1-57e2785737374cab8197fe64ac4c90da88045788"
-other = "Nichts tun"
-
-[settings_compressed_downloads_uncompress]
-hash = "sha1-83c0d48976f5f137e5bdda9c79782802e08a1394"
-other = "Entpacken"
-
 [settings_download_art]
 hash = "sha1-8b7f3d97b75d86dad90186e811d3b01b05894107"
 other = "Artwork herunterladen"

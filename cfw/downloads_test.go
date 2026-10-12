@@ -115,6 +115,25 @@ func TestRomLayout_IsDownloaded_MultiDiscNeedsThePlaylist(t *testing.T) {
 	}
 }
 
+// A game unpacked into its own folder has no file under the server's name, but
+// it is on the card all the same.
+func TestRomLayout_IsDownloaded_GameFolderCounts(t *testing.T) {
+	dir := t.TempDir()
+	layout := RomLayout{BaseName: "Monkey Island", FileNames: []string{"Monkey Island.zip"}}
+
+	if err := os.MkdirAll(filepath.Join(dir, "Monkey Island"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if layout.IsDownloaded(dir) {
+		t.Error("an empty folder, such as a failed unpack leaves, must not count")
+	}
+
+	touch(t, dir, "Monkey Island/monkey.000")
+	if !layout.IsDownloaded(dir) {
+		t.Error("expected downloaded once the game folder holds files")
+	}
+}
+
 func TestRomLayout_IsDownloaded_EmptyInputs(t *testing.T) {
 	dir := t.TempDir()
 	touch(t, dir, "Sonic.gba")
