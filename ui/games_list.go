@@ -410,12 +410,19 @@ func (s *GameListScreen) listOptions(title string, items []gaba.MenuItem, chrome
 }
 
 // biosButton opens the BIOS screen. Steam keeps the guide button, which is Menu
-// by default, so RetroDECK puts the shortcut on L2.
+// by default, so the Steam Deck firmwares use L2, which their input mapping
+// also gives to a click of the left stick. The trigger itself has not been seen
+// to reach Grout under Steam Input, so the footer names the click, L3.
 func biosButton() gabaconst.VirtualButton {
-	if cfw.GetCFW() == cfw.RetroDECK {
+	if isSteamDeck() {
 		return gabaconst.VirtualButtonL2
 	}
 	return gabaconst.VirtualButtonMenu
+}
+
+func isSteamDeck() bool {
+	c := cfw.GetCFW()
+	return c == cfw.RetroDECK || c == cfw.EmuDeck
 }
 
 func gameListFooter(chrome listChrome) []gaba.FooterHelpItem {
@@ -424,8 +431,11 @@ func gameListFooter(chrome listChrome) []gaba.FooterHelpItem {
 	if chrome.ShowBIOS {
 		// The Miyoo handhelds have no Menu button, so the shortcut sits on L2.
 		name := localize("button_menu", "Menu")
-		if environment.IsMiyoo() || biosButton() == gabaconst.VirtualButtonL2 {
+		if environment.IsMiyoo() {
 			name = "L2"
+		}
+		if isSteamDeck() {
+			name = "L3"
 		}
 		items = append(items, gaba.FooterHelpItem{ButtonName: name, HelpText: localize("button_bios", "BIOS")})
 	}
