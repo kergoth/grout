@@ -25,6 +25,9 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"grout/cfw/emudeck"
+	"grout/cfw/esde"
 )
 
 //go:embed platform_names.json
@@ -33,7 +36,7 @@ var platformNamesJSON []byte
 // cfwDocs lists the firmwares with a mapping page.
 var cfwDocs = []string{
 	"allium", "anbernic", "arkos", "batocera", "knulli", "koriki", "minui",
-	"muos", "nextui", "onion", "retrodeck", "rocknix", "spruce", "trimui",
+	"muos", "nextui", "onion", "retrodeck", "rocknix", "spruce", "trimui", "emudeck",
 }
 
 const (
@@ -105,19 +108,37 @@ func loadPlatformNames() (map[string]string, error) {
 	return names, nil
 }
 
-// generate rewrites the mapping table in one doc, reporting whether it
-// changed. Writes nothing when dryRun is set.
-func generate(cfw string, names map[string]string, dryRun bool) (bool, error) {
-	jsonPath := filepath.Join("cfw", cfw, "data", "platforms.json")
-	docPath := filepath.Join("docs", "platforms", cfw+".md")
+// platformTable returns a firmware's mapping and where it comes from, for error
+// messages. The ES-DE firmwares share a table, so theirs is not a file of
+// their own.
+func platformTable(cfw string) (map[string][]string, string, error) {
+	switch cfw {
+	case "retrodeck":
+		return esde.Platforms, "cfw/esde/data/platforms.json", nil
+	case "emudeck":
+		return emudeck.Platforms, "cfw/emudeck/data/platforms.json", nil
+	}
 
-	raw, err := os.ReadFile(jsonPath)
+	path := filepath.Join("cfw", cfw, "data", "platforms.json")
+	raw, err := os.ReadFile(path)
 	if err != nil {
-		return false, fmt.Errorf("read %s: %w", jsonPath, err)
+		return nil, path, fmt.Errorf("read %s: %w", path, err)
 	}
 	var platforms map[string][]string
 	if err := json.Unmarshal(raw, &platforms); err != nil {
-		return false, fmt.Errorf("parse %s: %w", jsonPath, err)
+		return nil, path, fmt.Errorf("parse %s: %w", path, err)
+	}
+	return platforms, path, nil
+}
+
+// generate rewrites the mapping table in one doc, reporting whether it
+// changed. Writes nothing when dryRun is set.
+func generate(cfw string, names map[string]string, dryRun bool) (bool, error) {
+	docPath := filepath.Join("docs", "platforms", cfw+".md")
+
+	platforms, jsonPath, err := platformTable(cfw)
+	if err != nil {
+		return false, err
 	}
 
 	doc, err := os.ReadFile(docPath)

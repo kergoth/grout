@@ -242,10 +242,6 @@
   "pc-booter": [
     "pc"
   ],
-  "pc-engine": [
-    "pcengine",
-    "tg16"
-  ],
   "pc-fx": [
     "pcfx"
   ],
@@ -345,9 +341,6 @@
   ],
   "ti-994a": [
     "ti99"
-  ],
-  "to8": [
-    "to8"
   ],
   "turbografx-cd": [
     "pcenginecd",

@@ -115,6 +115,8 @@ jobs:
             ./cfw/anbernic \
             ./cfw/arkos \
             ./cfw/batocera \
+            ./cfw/emudeck \
+            ./cfw/esde \
             ./cfw/knulli \
             ./cfw/koriki \
             ./cfw/minui \

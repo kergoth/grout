@@ -1,0 +1,103 @@
+{
+  "amiga": [
+    "amiga",
+    "amiga1200",
+    "amiga600"
+  ],
+  "android": [
+    "android",
+    "androidapps",
+    "androidgames"
+  ],
+  "arcade": [
+    "arcade",
+    "atomiswave",
+    "consolearcade",
+    "cps",
+    "cps1",
+    "cps2",
+    "cps3",
+    "daphne",
+    "fba",
+    "fbneo",
+    "laserdisc",
+    "mame",
+    "mame-advmame",
+    "naomi",
+    "naomi2",
+    "naomigd",
+    "pcarcade",
+    "triforce",
+    "type-x"
+  ],
+  "g-and-w": [
+    "gameandwatch",
+    "lcdgames"
+  ],
+  "jaguar": [
+    "atarijaguar",
+    "atarijaguarcd"
+  ],
+  "model2": [
+    "model2/roms"
+  ],
+  "msx": [
+    "msx",
+    "msx1"
+  ],
+  "ngage": [
+    "symbian",
+    "ngage"
+  ],
+  "odyssey-2": [
+    "odyssey2",
+    "videopac"
+  ],
+  "ps4": [
+    "ps4/shortcuts"
+  ],
+  "segacd": [
+    "segacd",
+    "megacd",
+    "megacdjp"
+  ],
+  "steam": [
+    "steam"
+  ],
+  "tic-80": [
+    "tic80"
+  ],
+  "trs-80": [
+    "trs-80"
+  ],
+  "turbografx-cd": [
+    "tg-cd",
+    "pcenginecd"
+  ],
+  "wiiu": [
+    "wiiu/roms"
+  ],
+  "win": [
+    "windows",
+    "pc",
+    "ags",
+    "desktop",
+    "doom",
+    "emulators",
+    "epic",
+    "kodi",
+    "lutris",
+    "ports",
+    "quake"
+  ],
+  "win9x": [
+    "windows9x"
+  ],
+  "xbox360": [
+    "xbox360/roms"
+  ],
+  "xboxone": [
+    "xboxone"
+  ],
+  "pc-booter": []
+}

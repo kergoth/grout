@@ -66,7 +66,6 @@ This table shows the mappings of RomM Fs Slug to RetroDECK's platform folders.
 | MSX Turbo R                      | msx-turbo                   | msxturbor                       |
 | MSX2                             | msx2                        | msx2                            |
 | MSX2+                            | msx2plus                    | msx2plus                        |
-| NEC PC Engine                    | pc-engine                   | pcengine, tg16                  |
 | NEC PC-8800 Series               | pc-8800-series              | pc88                            |
 | Neo Geo AES                      | neogeoaes                   | neogeo                          |
 | Neo Geo CD                       | neo-geo-cd                  | neogeocd, neogeocdjp            |
@@ -119,7 +118,6 @@ This table shows the mappings of RomM Fs Slug to RetroDECK's platform folders.
 | Texas Instruments TI-99/4A       | ti-994a                     | ti99                            |
 | Thomson MO/TO Series             | thomson-mo5                 | moto                            |
 | Thomson MO/TO Series             | thomson-to                  | moto, to8                       |
-| Thomson TO8                      | to8                         | to8                             |
 | Tiger Electronics Game.com       | game-dot-com                | gamecom                         |
 | TurboGrafx-16                    | tg16                        | tg16, pcengine                  |
 | TurboGrafx-CD                    | turbografx-cd               | pcenginecd, tg-cd               |

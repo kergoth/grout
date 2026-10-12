@@ -1,20 +1,13 @@
 package retrodeck
 
 import (
-	"embed"
-	"grout/tables"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
 )
 
-//go:embed data/*.json
-var embeddedFiles embed.FS
-
 var (
-	Platforms = tables.MustLoad[string, []string](embeddedFiles, "data/platforms.json")
-
 	configPaths = sync.OnceValue(func() *Paths {
 		paths, err := LoadConfig()
 		if err != nil {

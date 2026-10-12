@@ -11,11 +11,11 @@ import (
 // for a directory nobody remembered to add it to.
 var allFirmwares = All
 
-var esFirmwares = []CFW{Knulli, ROCKNIX, ArkOS, Batocera, RetroDECK}
+var esFirmwares = []CFW{Knulli, ROCKNIX, ArkOS, Batocera, RetroDECK, EmuDeck}
 
 // esdeFirmwares keep a folder per kind of media instead of sharing one with
 // filename suffixes.
-var esdeFirmwares = []CFW{RetroDECK}
+var esdeFirmwares = []CFW{RetroDECK, EmuDeck}
 
 func isESDE(c CFW) bool {
 	return slices.Contains(esdeFirmwares, c)

@@ -25,13 +25,14 @@ const (
 	MinUI     CFW = "MINUI"
 	Anbernic  CFW = "ANBERNIC"
 	RetroDECK CFW = "RETRODECK"
+	EmuDeck   CFW = "EMUDECK"
 )
 
 // All lists every supported firmware. Conformance tests range over it.
 var All = []CFW{
 	NextUI, MuOS, Knulli, Spruce, ROCKNIX, Trimui,
 	Allium, Onion, Koriki, ArkOS, Batocera, MinUI,
-	Anbernic, RetroDECK,
+	Anbernic, RetroDECK, EmuDeck,
 }
 
 // ErrUnsupported reports a firmware name grout does not recognise.
