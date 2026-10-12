@@ -57,6 +57,12 @@ func joinPath(base, rel string) string {
 	return filepath.Join(base, rel)
 }
 
+// ScummVMLauncher reports what the active firmware launches for an extracted
+// ScummVM game folder.
+func ScummVMLauncher(gameDir, romDir string) (string, bool, error) {
+	return ActiveFirmware().ScummVMLauncher(gameDir, romDir)
+}
+
 // OrganizeExtractedRom rearranges a multi-file game after it is unpacked, for
 // firmwares that want a layout the archive does not already have.
 func OrganizeExtractedRom(extractDir, romDir, baseName string) error {

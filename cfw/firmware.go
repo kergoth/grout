@@ -103,6 +103,11 @@ type Firmware struct {
 	// organizeExtracted rearranges a multi-file game after it is unpacked, for
 	// firmwares that want a layout the archive does not already have.
 	organizeExtracted func(extractDir, romDir, baseName string) error
+
+	// scummvmLauncher, when set, finds what the frontend should launch for an
+	// extracted ScummVM game folder. ok is false when it cannot, and the folder
+	// is then left as the generic path handling found it.
+	scummvmLauncher func(gameDir, romDir string) (path string, ok bool, err error)
 	// keepsRomExtInSaves names saves after the whole rom file rather than
 	// stripping the extension as RetroArch does. Fallback only, when the
 	// convention cannot be read off saves already on the device (issue #245).
@@ -144,6 +149,14 @@ func (f *Firmware) OrganizeExtracted(extractDir, romDir, baseName string) error 
 		return nil
 	}
 	return f.organizeExtracted(extractDir, romDir, baseName)
+}
+
+// ScummVMLauncher reports what to launch for an extracted ScummVM game folder.
+func (f *Firmware) ScummVMLauncher(gameDir, romDir string) (string, bool, error) {
+	if f == nil || f.scummvmLauncher == nil {
+		return "", false, nil
+	}
+	return f.scummvmLauncher(gameDir, romDir)
 }
 
 // DisplayQuirks describes handling a particular device needs. Rotation is in
@@ -280,6 +293,7 @@ var firmwares = map[CFW]*Firmware{
 		id:                MuOS,
 		romDirectory:      muos.GetRomDirectory,
 		organizeExtracted: muos.OrganizeMultiFileRom,
+		scummvmLauncher:   muos.ScummVMLauncher,
 		biosDirectory:     muos.GetBIOSDirectory,
 		baseSavePath:      muos.GetBaseSavePath,
 		coverDirectory:    inCatalogue(muos.GetArtDirectory),
@@ -410,6 +424,7 @@ var firmwares = map[CFW]*Firmware{
 		coverDirectory:        besideRoms(knulli.GetArtDirectory),
 		sidecarDirectories:    esSidecars(knulli.GetVideoDirectory, knulli.GetManualDirectory, knulli.GetBezelDirectory),
 		groutGamelist:         knulli.GetGroutGamelist,
+		scummvmLauncher:       knulli.ScummVMLauncher,
 		platforms:             knulli.Platforms,
 		saveDirectories:       knulli.SaveDirectories,
 		gamelist:              GamelistEmulationStation,

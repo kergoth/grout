@@ -186,6 +186,7 @@ func (s *DownloadScreen) unpack(input DownloadInput, plan download.Plan, downloa
 				logger.Error("Failed to unpack multi-file ROM", "game", game.Name, "error", err)
 				continue
 			}
+			path = scummvmEntry(platformOf(input.Platform, game).FSSlug, romDirectory, game.FsNameNoExt, path)
 			plan.SetGamePath(game.EntryFileName(), path)
 
 		case download.IsArchive(location):
@@ -220,6 +221,9 @@ func (s *DownloadScreen) unpackArchive(input DownloadInput, game romm.Rom, locat
 		path, err = s.extracting(game.Name, func(progress *atomic.Float64) (string, error) {
 			return download.ExtractToFolder(location, romDirectory, baseName, shape, progress)
 		})
+		if err == nil {
+			path = scummvmEntry(platform.FSSlug, romDirectory, baseName, path)
+		}
 	default:
 		logger.Debug("Keeping the archive", "game", game.Name, "platform", platform.FSSlug)
 		return
@@ -230,6 +234,25 @@ func (s *DownloadScreen) unpackArchive(input DownloadInput, game romm.Rom, locat
 		return
 	}
 	plan.SetGamePath(game.EntryFileName(), path)
+}
+
+// scummvmEntry swaps in the launcher stub for an extracted ScummVM game, on
+// firmwares that launch from one. Anything else, including a failed lookup,
+// keeps the path the unpack produced.
+func scummvmEntry(fsSlug, romDirectory, baseName, path string) string {
+	if !strings.EqualFold(fsSlug, "scummvm") {
+		return path
+	}
+
+	stub, ok, err := cfw.ScummVMLauncher(filepath.Join(romDirectory, baseName), romDirectory)
+	if err != nil {
+		gaba.GetLogger().Warn("Cannot look for a ScummVM launcher", "path", path, "error", err)
+		return path
+	}
+	if !ok {
+		return path
+	}
+	return stub
 }
 
 // extracting runs one unpack behind a progress dialog.

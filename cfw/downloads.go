@@ -48,6 +48,12 @@ func (l RomLayout) IsDownloaded(romDir string) bool {
 		return true
 	}
 
+	// A ScummVM game on muOS keeps its data in a hidden folder and is
+	// launched from this stub beside it.
+	if files.FileExists(filepath.Join(romDir, l.BaseName+".scummvm")) {
+		return true
+	}
+
 	if l.MultiDisc {
 		return files.FileExists(filepath.Join(romDir, l.BaseName+playlistExt))
 	}

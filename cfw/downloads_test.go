@@ -74,6 +74,18 @@ func TestRomLayout_IsDownloaded_SingleFile(t *testing.T) {
 	}
 }
 
+// muOS hides a ScummVM game's folder behind an underscore and launches it from
+// a stub beside it, so the stub is what shows the game is there.
+func TestRomLayout_IsDownloaded_ScummVMStub(t *testing.T) {
+	dir := t.TempDir()
+	layout := RomLayout{BaseName: "Sky", FileNames: []string{"Sky.zip"}}
+
+	touch(t, dir, "Sky.scummvm")
+	if !layout.IsDownloaded(dir) {
+		t.Error("expected downloaded once the launcher stub exists")
+	}
+}
+
 // A game offering several versions counts once any one of them is on disk;
 // requiring all of them would mark every such game as missing.
 func TestRomLayout_IsDownloaded_AnyVersionCounts(t *testing.T) {
