@@ -9,7 +9,7 @@
       A RomM Client for your retro doo-dad.
     </h3>
 
-[Allium][allium] · [Anbernic Stock OS][anbernic] · [ArkOS][arkos] · [Batocera][batocera] · [dArkOS][darkos] · [Knulli][knulli] · [Koriki][koriki] · [MinUI][minui]
+[Allium][allium] · [Anbernic Stock OS][anbernic] · [ArkOS][arkos] · [Batocera][batocera] · [dArkOS][darkos] · [EmuDeck][emudeck] · [Knulli][knulli] · [Koriki][koriki] · [MinUI][minui]
 
 [muOS][muos] · [NextUI][nextui] · [Onion][onion] · [RetroDECK][retrodeck] · [ROCKNIX][rocknix] · [spruce][spruce] · [sprigUI][sprigui] · [twigUI][twigui] · [TrimUI][trimui]
 
@@ -99,6 +99,7 @@ If you enjoy using Grout and feel inclined to pay it forward, go do something ni
 [muos]: https://muos.dev
 [nextui]: https://nextui.loveretro.games
 [onion]: https://onionui.github.io
+[emudeck]: https://www.emudeck.com
 [retrodeck]: https://retrodeck.net
 [rocknix]: https://rocknix.org
 [spruce]: https://spruceui.github.io/

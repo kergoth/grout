@@ -3,6 +3,7 @@
 [arkos]: https://github.com/christianhaitian/arkos
 [darkos]: https://github.com/christianhaitian/dArkOS
 [batocera]: https://batocera.org
+[emudeck]: https://www.emudeck.com
 [knulli]: https://knulli.org
 [koriki]: https://github.com/Rparadise-Team/Koriki
 [minui]: https://github.com/shauninman/MinUI
