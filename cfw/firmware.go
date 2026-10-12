@@ -35,6 +35,11 @@ type Firmware struct {
 	// TrimUI keep a catalogue keyed by platform.
 	coverDirectory func(romDir, platformFSSlug, platformName string) string
 
+	// mediaDirectory, when set, takes over every kind of media it knows a
+	// directory for, and files in them go without a suffix. It is how ES-DE
+	// lays media out: one folder per kind, per system.
+	mediaDirectory func(slot ArtSlot, romDir string) string
+
 	// sidecarDirectories is nil outside the EmulationStation family.
 	sidecarDirectories func(romDir string) (video, manual, bezel string)
 
@@ -117,6 +122,10 @@ type Firmware struct {
 	// extension. It overrides inferring the style from saves on the card.
 	saveNaming func() (keepRomExt bool, ext string)
 }
+
+// UsesMediaFolders reports whether the firmware keeps each kind of media in a
+// folder of its own, so the files need no suffix to tell them apart.
+func (f *Firmware) UsesMediaFolders() bool { return f != nil && f.mediaDirectory != nil }
 
 func (f *Firmware) IsBasedOnEmulationStation() bool {
 	return f != nil && f.emulationStationBased
@@ -284,6 +293,12 @@ func esSidecars(video, manual, bezel func(string) string) func(string) (string, 
 	return func(romDir string) (string, string, string) {
 		return video(romDir), manual(romDir), bezel(romDir)
 	}
+}
+
+// bezelsOnly is for firmwares whose video and manuals live in a media folder,
+// leaving bezels as the one sidecar kept beside the roms.
+func bezelsOnly(bezel func(string) string) func(string) (string, string, string) {
+	return func(romDir string) (string, string, string) { return "", "", bezel(romDir) }
 }
 
 // firmwares describes every supported device. A literal rather than init-time
@@ -492,8 +507,8 @@ var firmwares = map[CFW]*Firmware{
 		romDirectory:          retrodeck.GetRomDirectory,
 		biosDirectory:         retrodeck.GetBIOSDirectory,
 		baseSavePath:          retrodeck.GetBaseSavePath,
-		coverDirectory:        besideRoms(retrodeck.GetArtDirectory),
-		sidecarDirectories:    esSidecars(retrodeck.GetVideoDirectory, retrodeck.GetManualDirectory, retrodeck.GetBezelDirectory),
+		mediaDirectory:        esdeMedia(retrodeck.GetMediaDirectory),
+		sidecarDirectories:    bezelsOnly(retrodeck.GetBezelDirectory),
 		platforms:             retrodeck.Platforms,
 		saveDirectories:       retrodeck.Platforms,
 		gamelist:              GamelistEmulationStation,
@@ -596,6 +611,12 @@ func (f *Firmware) RomFolderBase(path string, tagParser func(string) string) str
 func (f *Firmware) ArtDirectory(slot ArtSlot, romDir, platformFSSlug, platformName string) string {
 	if f == nil {
 		return ""
+	}
+
+	if f.mediaDirectory != nil {
+		if dir := f.mediaDirectory(slot, romDir); dir != "" {
+			return dir
+		}
 	}
 
 	cover := func() string {
