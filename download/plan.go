@@ -303,9 +303,10 @@ func artItems(config settings.Config, host settings.Host, game romm.Rom, platfor
 			continue
 		}
 
-		name := cfw.ArtFileName(activeCFW, spec.slot, romArtFileName(game), game.FsNameNoExt)
+		stem := cfw.MediaStem(activeCFW, platform.FSSlug, game.FsNameNoExt)
+		name := cfw.ArtFileName(activeCFW, spec.slot, romArtFileName(game), stem)
 		if spec.fixedExt != "" {
-			name = game.FsNameNoExt + spec.fixedExt
+			name = stem + spec.fixedExt
 		}
 
 		location := filepath.Join(dir, name)
