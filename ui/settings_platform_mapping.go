@@ -84,16 +84,7 @@ func (s *PlatformMappingScreen) Draw(input PlatformMappingInput) (PlatformMappin
 	// platform the user never scrolled to still gets the folder grout picked
 	// for it.
 	if len(mappings) == 0 {
-		for _, platform := range platforms {
-			choices := s.choicesFor(platform, directories, mappings, input)
-			if choices.Selected >= 0 {
-				slug := platform.FSSlug
-				mappings[slug] = settings.DirectoryMapping{
-					RomMSlug:     slug,
-					RelativePath: choices.Directories[choices.Selected].RelativePath,
-				}
-			}
-		}
+		mappings = s.detectMappings(platforms, directories, input)
 	}
 
 	filter := catalog.PlatformFilter{Status: catalog.StatusAll}
@@ -184,6 +175,31 @@ func (s *PlatformMappingScreen) footer(input PlatformMappingInput) []gaba.Footer
 		gaba.FooterHelpItem{ButtonName: "Y", HelpText: localize("button_filters", "Filters")},
 		FooterSave(),
 	)
+}
+
+// detectMappings picks the folder each platform would get on a first run.
+//
+// Each platform is judged against no mappings at all. Passing the map being
+// built would make DirectoryChoicesFor treat the screen as a return visit as
+// soon as one platform was captured, and every platform after it would come
+// out as Skip.
+func (s *PlatformMappingScreen) detectMappings(
+	platforms []romm.Platform,
+	directories []string,
+	input PlatformMappingInput,
+) map[string]settings.DirectoryMapping {
+	detected := make(map[string]settings.DirectoryMapping)
+	for _, platform := range platforms {
+		choices := s.choicesFor(platform, directories, nil, input)
+		if choices.Selected >= 0 {
+			slug := platform.FSSlug
+			detected[slug] = settings.DirectoryMapping{
+				RomMSlug:     slug,
+				RelativePath: choices.Directories[choices.Selected].RelativePath,
+			}
+		}
+	}
+	return detected
 }
 
 func (s *PlatformMappingScreen) choicesFor(
